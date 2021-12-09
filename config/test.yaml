@@ -1,0 +1,40 @@
+nav_core:
+  global_costmap:
+    footprint: [[2.65, 0], [2.6, 0.1], [2.4, 0.4], [1.9, 0.6], [1.0, 0.85], [-1.3, 0.85], [-1.35, 0.4], [-1.6, 0.35], [-1.6, -0.35], [-1.35, -0.4], [-1.3, -0.85], [1.0, -0.85], [1.9, -0.6], [2.4, -0.4], [2.6, -0.1], [2.65, 0]]
+
+    global_frame: ben/map
+    robot_base_frame: ben/base_link
+    max_obstacle_height: 5
+
+    plugins: 
+    - {name: chart,            type: "s57_layer::S57Layer"}
+    - {name: inflation,        type: "costmap_2d::InflationLayer"}
+    publish_frequency: 1.0
+    update_frequency: 1.0
+    rolling_window: true
+    width: 20000
+    height: 20000
+    resolution: 3
+
+    inflation:
+        inflation_radius: 100
+        cost_scaling_factor: 0.05
+
+  local_costmap:
+    footprint: [[2.65, 0], [2.6, 0.1], [2.4, 0.4], [1.9, 0.6], [1.0, 0.85], [-1.3, 0.85], [-1.35, 0.4], [-1.6, 0.35], [-1.6, -0.35], [-1.35, -0.4], [-1.3, -0.85], [1.0, -0.85], [1.9, -0.6], [2.4, -0.4], [2.6, -0.1], [2.65, 0]]
+
+    global_frame: ben/map
+    robot_base_frame: ben/base_link
+    max_obstacle_height: 5
+
+  base_global_planner: dubins_planner/DubinsPlanner
+
+  DubinsPlanner:
+    step_size: 2.5
+    radius: 15
+
+  base_local_planner: path_follower/PathFollower
+
+  PathFollower:
+    base_frame: "ben/base_link"
+
