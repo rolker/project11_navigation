@@ -1,4 +1,8 @@
-#!/usr/bin/python
+#!/usr/bin/python3
+
+'''
+Written by Val Schmidt with contributions from Roland Arsenault
+'''
 
 import rospy
 import tf2_ros
@@ -7,39 +11,29 @@ import tf2_geometry_msgs
 from nav_msgs.msg import OccupancyGrid
 from geographic_visualization_msgs.msg import GeoVizItem, GeoVizPointList, GeoVizPolygon
 from geometry_msgs.msg import PoseStamped
+from geometry_msgs.msg import PointStamped
 from geographic_msgs.msg import GeoPoint
-
-from robot_localization.srv import *
-
-def toLL(x, y, z=0.0):
-    rospy.wait_for_service('/cora/robot_localization/toLL')
-    try:
-        sp = rospy.ServiceProxy('/cora/robot_localization/toLL', ToLL)
-        r = ToLLRequest()
-        r.map_point.x = x
-        r.map_point.y = y
-        r.map_point.z = z
-        return sp(r).ll_point
-    except rospy.ServiceException as e:
-        print("Service call failed: %s"%e)
-
+import project11
 
 def costmap_callback(data):
-    try:
-        transformation = tf_buffer.lookup_transform('map', data.header.frame_id, data.header.stamp, rospy.Duration(1.0))
-    except Exception as e:
-        rospy.logwarn(str(e))
-    else:
-        origin = PoseStamped()
-        origin.pose = data.info.origin
-        
-        origin_map = tf2_geometry_msgs.do_transform_pose(origin, transformation)
-        origin_ll = toLL(origin_map.pose.position.x,origin_map.pose.position.y,origin_map.pose.position.z)
-        
-        height_meters = data.info.resolution*data.info.height
-        width_meters = data.info.resolution*data.info.width
-        opposite_ll = toLL(origin_map.pose.position.x+height_meters,origin_map.pose.position.y+width_meters,origin_map.pose.position.z)
-        
+    origin = PointStamped()
+    origin.point = data.info.origin.position
+    origin.header = data.header
+
+    height_meters = data.info.resolution*data.info.height
+    width_meters = data.info.resolution*data.info.width
+
+    opposite = PointStamped()
+    opposite.point.x = origin.point.x+height_meters
+    opposite.point.y = origin.point.y+width_meters
+    opposite.point.z = origin.point.z
+    opposite.header = data.header
+
+    corners_ll = earth.pointListToGeoPointList((origin, opposite))
+    if len(corners_ll) == 2 and corners_ll[0] is not None and corners_ll[1] is not None:
+        origin_ll = corners_ll[0].position
+        opposite_ll = corners_ll[1].position
+
         vizItem = GeoVizItem()
         
         vizItem.id = 'occupency_grid'
@@ -63,11 +57,12 @@ def costmap_callback(data):
         for row in range(data.info.height):
             for col in range(data.info.width):
                 if data.data[row*data.info.width+col] > 0:
+                    intensity = data.data[row*data.info.width+col]/255.0
                     p = GeoVizPolygon()
                     p.fill_color.r = 0.1
                     p.fill_color.g = 0.1
                     p.fill_color.b = 0.1
-                    p.fill_color.a = 0.7
+                    p.fill_color.a = intensity
                     for i in ( (0,0), (0,1), (1,1), (1,0), (0,0) ):
                         gp = GeoPoint()
                         gp.latitude = origin_ll.latitude+dlat*(row+i[0])
@@ -81,14 +76,17 @@ grid_sub = None
 # allow tf_buffer to fill up a bit before asking for a grid
 def delayed_subscribe(data):
     global grid_sub
-    grid_sub = rospy.Subscriber('occupancy_grid', OccupancyGrid, costmap_callback)
+    grid_sub = rospy.Subscriber('occupancy_grid', OccupancyGrid, costmap_callback, queue_size=1)
 
 rospy.init_node("occupancy_to_camp")
+
+earth = project11.nav.EarthTransforms()
+
 
 tf_buffer = tf2_ros.Buffer()
 tf_listener = tf2_ros.TransformListener(tf_buffer)
 
-display_publisher = rospy.Publisher('/project11/display', GeoVizItem, queue_size = 10)
+display_publisher = rospy.Publisher('project11/display', GeoVizItem, queue_size = 10)
 
 rospy.Timer(rospy.Duration(2), delayed_subscribe, oneshot=True)
 
