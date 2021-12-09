@@ -17,6 +17,7 @@
   <depend>pluginlib</depend>
   <depend>project11_nav_msgs</depend>
   <depend>roscpp</depend>
+  <depend>rospy</depend>
   <depend>tf2</depend>
   
   <export>

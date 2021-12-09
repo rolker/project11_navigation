@@ -13,8 +13,11 @@ find_package(catkin REQUIRED COMPONENTS
   pluginlib
   project11_nav_msgs
   roscpp
+  rospy
   tf2
 )
+
+catkin_python_setup()
 
 add_action_files(DIRECTORY action FILES RunTasks.action)
 generate_messages(DEPENDENCIES actionlib_msgs project11_nav_msgs)
@@ -22,7 +25,7 @@ generate_messages(DEPENDENCIES actionlib_msgs project11_nav_msgs)
 catkin_package(
   INCLUDE_DIRS include
 #  LIBRARIES 
-  CATKIN_DEPENDS actionlib actionlib_msgs costmap_2d geometry_msgs nav_core pluginlib project11_nav_msgs roscpp tf2
+  CATKIN_DEPENDS actionlib actionlib_msgs costmap_2d geometry_msgs nav_core pluginlib project11_nav_msgs roscpp rospy tf2
 #  DEPENDS system_lib
 )
 
