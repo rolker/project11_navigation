@@ -23,4 +23,36 @@ void adjustTrajectoryForSpeed(std::vector<geometry_msgs::PoseStamped>& trajector
 
 }
 
+geometry_msgs::Vector3 vectorBetween(const geometry_msgs::Pose& from, const geometry_msgs::Pose& to)
+{
+  geometry_msgs::Vector3 ret;
+
+  ret.x = to.position.x - from.position.x;
+  ret.y = to.position.y - from.position.y;
+  ret.z = to.position.z - from.position.z;
+
+  return ret;
+}
+
+double length(const geometry_msgs::Vector3& vector)
+{
+  double sum = vector.x*vector.x + vector.y*vector.y + vector.z*vector.z;
+  if(sum > 0.0)
+    return sqrt(sum);
+  return 0.0;
+}
+
+geometry_msgs::Vector3 normalize(const geometry_msgs::Vector3& vector)
+{
+  geometry_msgs::Vector3 ret;
+  double l = length(vector);
+  if(l>0.0)
+  {
+    ret.x = vector.x/l;
+    ret.y = vector.y/l;
+    ret.z = vector.z/l;
+  }
+  return ret;
+}
+
 } // namespace project11_navigation

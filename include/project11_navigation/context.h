@@ -11,6 +11,8 @@ namespace project11_navigation
 {
 
 class Robot;
+class Task;
+class TaskWrapper;
 
 // Assembles the relevant data for accomplishing navigation tasks.
 class Context
@@ -26,6 +28,8 @@ public:
   bool getOutputEnabled();
   tf2_ros::Buffer& tfBuffer();
   geometry_msgs::PoseStamped getPoseInFrame(std::string frame_id);
+
+  std::shared_ptr<TaskWrapper> getTaskWrapper(std::shared_ptr<Task> task);
 private:
   void updateRobotCapabilities(const RobotCapabilities& robot_capabilities);
   void updateOdometry(const nav_msgs::Odometry& odom);

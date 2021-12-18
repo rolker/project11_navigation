@@ -1,5 +1,12 @@
 #include <project11_navigation/context.h>
 #include "tf2_geometry_msgs/tf2_geometry_msgs.h"
+#include <project11_navigation/interfaces/task_wrapper.h>
+
+#include <project11_navigation/tasks/generic.h>
+#include <project11_navigation/tasks/hover.h>
+#include <project11_navigation/tasks/survey_area.h>
+#include <project11_navigation/tasks/survey_line.h>
+#include <project11_navigation/tasks/transit.h>
 
 namespace project11_navigation
 {
@@ -70,6 +77,27 @@ geometry_msgs::PoseStamped Context::getPoseInFrame(std::string frame_id)
     ROS_WARN_STREAM("Context::getPoseInFrame " << ex.what());
   }
 
+  return ret;
+}
+
+std::shared_ptr<TaskWrapper> Context::getTaskWrapper(std::shared_ptr<Task> task)
+{
+  std::shared_ptr<TaskWrapper> ret;
+  if(task)
+  {
+    if(task->message().type == "hover")
+      ret = std::make_shared<HoverTask>();
+    else if(task->message().type == "survey_area")
+      ret = std::make_shared<SurveyAreaTask>();
+    else if(task->message().type == "survey_line")
+      ret = std::make_shared<SurveyLineTask>();
+    else if(task->message().type == "transit")
+      ret = std::make_shared<TransitTask>();
+    else
+      ret = std::make_shared<GenericTask>();
+    ret->context_ = this;
+    ret->task_ = task;
+  }
   return ret;
 }
 

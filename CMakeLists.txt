@@ -42,9 +42,16 @@ set(NAVIGATOR_SOURCES
   src/platform.cpp
   src/robot.cpp
   src/task.cpp
+  src/tasklist.cpp
   src/utilities.cpp
+  src/tasks/generic.cpp
+  src/tasks/hover.cpp
+  src/tasks/survey_area.cpp
+  src/tasks/survey_line.cpp
+  src/tasks/transit.cpp
   src/workflows/execute_task.cpp
   src/workflows/nav_core.cpp
+  src/workflows/task_connector.cpp
   src/workflows/task_manager.cpp
 )
 

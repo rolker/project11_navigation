@@ -2,6 +2,7 @@
 #define PROJECT11_NAVIGATION_WORKFLOWS_TASK_MANAGER_H
 
 #include <project11_navigation/interfaces/tasklist_to_twist_workflow.h>
+#include <project11_navigation/interfaces/tasklist_to_tasklist_workflow.h>
 #include <project11_navigation/workflows/execute_task.h>
 #include <project11_navigation/task.h>
 
@@ -20,6 +21,8 @@ private:
   void updateCurrentTask();
 
   Context::Ptr context_;
+
+  std::shared_ptr<TaskListToTaskListWorkflow> task_connector_;
 
   std::shared_ptr<TaskToTwistWorkflow> executive_;
 

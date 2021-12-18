@@ -45,7 +45,12 @@ void NavigatorAction::iterate(const ros::TimerEvent& event)
 void NavigatorAction::done()
 {
   if(action_server_.isActive())
-    action_server_.setSucceeded();
+  {
+    RunTasksResult result;
+    if(task_list_)
+      result.tasks = task_list_->taskMessages();
+    action_server_.setSucceeded(result);
+  }
 }
 
 } // namespace project11_navigation

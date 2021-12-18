@@ -22,6 +22,9 @@ void readLinearAngularParameters(ros::NodeHandle &nh, const std::string& paramet
 
 void adjustTrajectoryForSpeed(std::vector<geometry_msgs::PoseStamped>& trajectory, double speed);
 
+geometry_msgs::Vector3 vectorBetween(const geometry_msgs::Pose& from, const geometry_msgs::Pose& to);
+double length(const geometry_msgs::Vector3& vector);
+geometry_msgs::Vector3 normalize(const geometry_msgs::Vector3& vector);
 } // namespace project11_navigation
 
 #endif

@@ -25,6 +25,20 @@ void ExecuteTask::setGoal(const std::shared_ptr<Task>& input)
       current_handler_= task_handlers_[input->message().type];
       if(current_handler_)
         current_handler_->setGoal(input);
+      else
+      {
+        auto transit_to = current_task_->getFirstChildOfTypeAndID("transit","transit_to");
+        if(transit_to && !transit_to->done())
+        {
+          current_handler_= task_handlers_["transit"];
+          current_handler_->setGoal(transit_to);
+        }
+        else
+        {
+          current_task_->setStatus("Skipped by ExecuteTask");
+          current_task_->setDone();
+        }
+      }
     }
     else
       current_handler_.reset();
