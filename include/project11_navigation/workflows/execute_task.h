@@ -20,8 +20,12 @@ public:
   bool running() override;
   bool getResult(geometry_msgs::TwistStamped& output) override;
 private:
+  bool updateCurrentHandler();
+
+  Context::Ptr context_;
   std::map<std::string, std::shared_ptr<TaskToTwistWorkflow> > task_handlers_;
   std::shared_ptr<Task> current_task_;
+  std::shared_ptr<Task> current_nav_task_;
   std::shared_ptr<TaskToTwistWorkflow> current_handler_;
 };
 

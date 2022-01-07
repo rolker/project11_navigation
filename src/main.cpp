@@ -5,6 +5,7 @@
 int main(int argc, char** argv)
 {
   ros::init(argc, argv, "navigator");
+  ros::NodeHandle nh;
 
   project11_navigation::NavigatorAction navigator(ros::this_node::getName());
   ros::spin();

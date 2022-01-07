@@ -63,5 +63,15 @@ void SurveyAreaTask::updateTransit(const geometry_msgs::PoseStamped& from_pose, 
     out_pose = in_pose;
 }
 
+std::shared_ptr<Task> SurveyAreaTask::getCurrentNavigationTask()
+{
+  auto transit_to = task_->getFirstChildOfTypeAndID("transit","transit_to");
+  if(transit_to && !transit_to->done())
+    return transit_to;
+  // TODO send next line or transit
+  return std::shared_ptr<Task>();
+}
+
+
 
 } // namespace project11_navigation

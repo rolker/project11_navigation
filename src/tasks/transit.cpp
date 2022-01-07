@@ -21,5 +21,10 @@ void TransitTask::updateTransit(const geometry_msgs::PoseStamped& from_pose, geo
     out_pose = from_pose;
 }
 
+std::shared_ptr<Task> TransitTask::getCurrentNavigationTask()
+{
+  return task_;
+}
+
 
 } // namespace project11_navigation

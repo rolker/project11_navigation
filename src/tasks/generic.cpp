@@ -40,4 +40,12 @@ void GenericTask::updateTransit(const geometry_msgs::PoseStamped& from_pose, geo
     out_pose = in_pose;
 }
 
+std::shared_ptr<Task> GenericTask::getCurrentNavigationTask()
+{
+  auto transit_to = task_->getFirstChildOfTypeAndID("transit","transit_to");
+  if(transit_to && !transit_to->done())
+    return transit_to;
+  return std::shared_ptr<Task>();
+}
+
 } // namespace project11_navigation
