@@ -74,9 +74,12 @@ void NavCore::setGoal(const std::shared_ptr<Task>& input)
   else
     ROS_INFO_STREAM("empty task");
   
-  task_ = input;
-  if(!task_ || task_ != input)
+  if(task_ != input)
+  {
     task_update_time_ = ros::Time();
+    ROS_INFO_STREAM("it's a new task");
+  }
+  task_ = input;
   updatePlan();
 }
 
@@ -86,21 +89,30 @@ void NavCore::updatePlan()
   if(task_ && task_->lastUpdateTime() == task_update_time_)
     return;
 
+  ROS_INFO_STREAM("different task or same with different update time");
+
   current_plan_.clear();
   controller_->setPlan(current_plan_);
   publishPlan();
-  if(task_ && !task_->message().poses.empty())
-  {
-    if(!task_->done())
+  if(task_)
+    if(task_->message().poses.empty())
     {
-      auto goal = task_->message().poses.front();
-      geometry_msgs::PoseStamped start = context_->getPoseInFrame(goal.header.frame_id);
-      ROS_INFO_STREAM("start:\n" << start);
-      new_plan_.clear();
-      plan_ready_ = std::async(&NavCore::planThread, this, start, goal, std::ref(new_plan_));
+      task_->setDone();
+      task_update_time_ = task_->lastUpdateTime();
+      ROS_INFO_STREAM("no goal pose");
     }
-    task_update_time_ = task_->lastUpdateTime();
-  }
+    else
+    {
+      if(!task_->done())
+      {
+        auto goal = task_->message().poses.front();
+        geometry_msgs::PoseStamped start = context_->getPoseInFrame(goal.header.frame_id);
+        ROS_INFO_STREAM("start:\n" << start);
+        new_plan_.clear();
+        plan_ready_ = std::async(&NavCore::planThread, this, start, goal, std::ref(new_plan_));
+      }
+      task_update_time_ = task_->lastUpdateTime();
+    }
   else
     task_update_time_ = ros::Time();
 
@@ -113,8 +125,18 @@ bool NavCore::planThread(const geometry_msgs::PoseStamped start, const geometry_
 
 bool NavCore::running()
 {
-  if(task_ && !task_->message().poses.empty())
-    return !controller_->isGoalReached();
+  if(task_ && !task_->done())
+  {
+    if (controller_->isGoalReached())
+    {
+      ROS_INFO_STREAM("Task done: " << task_->message().id);
+      task_->setDone();
+      current_plan_.clear();
+      controller_->setPlan(current_plan_);
+      publishPlan();
+    }
+    return !task_->done();
+  }
   return false;
 }
 
@@ -122,17 +144,8 @@ bool NavCore::getResult(geometry_msgs::TwistStamped& output)
 {
   updatePlan();
   checkForNewPlan();
-  if(task_ && !task_->done())
-  {
-    if (controller_->isGoalReached())
-    {
-      task_->setDone();
-      current_plan_.clear();
-      publishPlan();
-    }
-    else
+  if(running())
       return controller_->computeVelocityCommands(output.twist);
-  }
   return false;
 }
 

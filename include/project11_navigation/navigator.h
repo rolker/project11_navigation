@@ -32,6 +32,7 @@ private:
 
 
   double controller_frequency_ = 10.0;
+  std::string base_frame_;
 
   std::shared_ptr<TaskListToTwistWorkflow> task_manager_;
 

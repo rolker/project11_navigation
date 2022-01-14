@@ -5,6 +5,7 @@
 #include <project11_navigation/task.h>
 #include <geometry_msgs/TwistStamped.h>
 #include <project11_navigation/interfaces/task_to_twist_workflow.h>
+#include <pluginlib/class_loader.h>
 
 namespace project11_navigation
 {
@@ -13,6 +14,7 @@ namespace project11_navigation
 class ExecuteTask: public TaskToTwistWorkflow
 {
 public:
+  ExecuteTask();
   ~ExecuteTask();
 
   void configure(std::string name, Context::Ptr context) override;
@@ -23,10 +25,13 @@ private:
   bool updateCurrentHandler();
 
   Context::Ptr context_;
-  std::map<std::string, std::shared_ptr<TaskToTwistWorkflow> > task_handlers_;
+  std::map<std::string, boost::shared_ptr<TaskToTwistWorkflow> > task_handlers_;
   std::shared_ptr<Task> current_task_;
   std::shared_ptr<Task> current_nav_task_;
-  std::shared_ptr<TaskToTwistWorkflow> current_handler_;
+  boost::shared_ptr<TaskToTwistWorkflow> current_handler_;
+
+  pluginlib::ClassLoader<TaskToTwistWorkflow> task_handler_loader_;
+
 };
 
 }  // namespace project11_navigation

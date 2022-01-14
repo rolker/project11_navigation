@@ -5,6 +5,12 @@
 namespace project11_navigation
 {
 
+ExecuteTask::ExecuteTask():
+  task_handler_loader_("project11_navigation", "project11_navigation::TaskToTwistWorkflow")
+{
+  
+}
+
 ExecuteTask::~ExecuteTask()
 {
 
@@ -13,8 +19,21 @@ ExecuteTask::~ExecuteTask()
 void ExecuteTask::configure(std::string name, Context::Ptr context)
 {
   context_ = context;
-  task_handlers_["transit"] = std::make_shared<NavCore>();
+  task_handlers_["transit"] = boost::make_shared<NavCore>();
   task_handlers_["transit"]->configure("nav_core", context);
+
+  std::string hover_handler = "hover/Hover";
+  try
+  {
+    auto handler = task_handler_loader_.createInstance(hover_handler);
+    handler->configure(task_handler_loader_.getName(hover_handler), context);
+    task_handlers_["hover"] = handler;
+  }
+  catch(const std::exception& e)
+  {
+    ROS_FATAL("Failed to create the %s planner, are you sure it is properly registered and that the containing library is built? Exception: %s", hover_handler.c_str(), e.what());
+    exit(1);
+  }
 }
 
 void ExecuteTask::setGoal(const std::shared_ptr<Task>& input)
@@ -22,21 +41,18 @@ void ExecuteTask::setGoal(const std::shared_ptr<Task>& input)
   if(input != current_task_)
   {
     current_task_ = input;
-    current_handler_.reset();
     updateCurrentHandler();
   }
 }
 
 bool ExecuteTask::running()
 {
-  if (current_handler_ && current_handler_->running())
-    return true;
   return updateCurrentHandler();
 }
 
 bool ExecuteTask::getResult(geometry_msgs::TwistStamped& output)
 {
-  if(current_handler_)
+  if(running())
     return current_handler_->getResult(output);
 
   return false;
@@ -44,19 +60,25 @@ bool ExecuteTask::getResult(geometry_msgs::TwistStamped& output)
 
 bool ExecuteTask::updateCurrentHandler()
 {
+  auto old_handler = current_handler_;
   if(current_task_)
   {
     auto tw = context_->getTaskWrapper(current_task_);
     if(tw)
     {
+      auto old_nav_task = current_nav_task_;
       current_nav_task_ = tw->getCurrentNavigationTask();
-      current_handler_= task_handlers_[current_nav_task_->message().type];
-      if(current_handler_)
-        current_handler_->setGoal(current_nav_task_);
-      else
+      if(current_nav_task_ != old_nav_task)
       {
-        current_nav_task_->setStatus("Skipped by ExecuteTask");
-        current_nav_task_->setDone();
+        ROS_INFO_STREAM("Current nav task:" << current_nav_task_->message());
+        current_handler_= task_handlers_[current_nav_task_->message().type];
+        if(current_handler_)
+          current_handler_->setGoal(current_nav_task_);
+        else
+        {
+          current_nav_task_->setStatus("Skipped by ExecuteTask");
+          current_nav_task_->setDone();
+        }
       }
     }
     else
@@ -64,6 +86,8 @@ bool ExecuteTask::updateCurrentHandler()
   }
   else
     current_handler_.reset();
+  if(old_handler && old_handler != current_handler_)
+    old_handler->setGoal(std::shared_ptr<Task>());
   return current_handler_ && current_handler_->running();
 }
 

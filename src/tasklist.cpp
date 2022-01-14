@@ -13,7 +13,7 @@ TaskList::TaskList(Task* parent):parent_task_(parent)
 void TaskList::update(const std::vector<project11_nav_msgs::Task>& task_msgs)
 {
   // Create a new vector adding tasks in order they appear.
-  // Existing tasks may be copied from existing vector or new ones created is needed.
+  // Existing tasks may be copied from existing vector or new ones created if needed.
   std::vector<std::shared_ptr<Task> > new_task_list;
   // First, the direct children or top level tasks
   for(const auto& task_msg: task_msgs)
@@ -196,7 +196,7 @@ std::shared_ptr<Task> TaskList::getFirstTaskOfTypeAndID(std::string type, std::s
     if(t->message().type == type)
     {
       auto id_parts = splitChildID(t->message().id);
-      ROS_INFO_STREAM(id_parts.first << ", " << id_parts.second << " ? " << id);
+      //ROS_INFO_STREAM(id_parts.first << ", " << id_parts.second << " ? " << id);
       if(id_parts.second == id)
         return t;
     }

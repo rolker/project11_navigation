@@ -6,7 +6,8 @@ namespace project11_navigation
 
 Task::Task(const project11_nav_msgs::Task& task_msg):
   message_(task_msg),
-  children_(this)
+  children_(this),
+  last_update_time_(ros::Time::now())
 {
 
 }
@@ -15,8 +16,9 @@ bool Task::update(const project11_nav_msgs::Task& task_msg)
 {
   if(message_.id == task_msg.id)
   {
+    if(message_ != task_msg)
+      last_update_time_ = ros::Time::now();
     message_= task_msg;
-    last_update_time_ = ros::Time::now();
     return true;
   }
   return false;
@@ -130,14 +132,15 @@ void Task::updateTransitTo(const geometry_msgs::PoseStamped& in_pose)
   {
     ROS_INFO_STREAM("creating a transit_to for " << message_.id);
     transit = createChildTaskBefore(getFirstChildTask());
-    auto m = transit->message();
-    m.type = "transit";
-    m.poses.push_back(in_pose);
-    transit->update(m);
     setChildID(transit, "transit_to");
   }
   else
-    ROS_INFO_STREAM("transit_to exists for " << message_.id);
+    ROS_INFO_STREAM("transit_to exists for " << message_.id << ", updating");
+  auto m = transit->message();
+  m.type = "transit";
+  m.poses.clear();
+  m.poses.push_back(in_pose);
+  transit->update(m);
 }
 
 }  // namespace project11_navigation

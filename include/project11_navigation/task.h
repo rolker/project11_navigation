@@ -40,8 +40,8 @@ public:
 
 private:
   project11_nav_msgs::Task message_;
-  ros::Time last_update_time_;
   TaskList children_;
+  ros::Time last_update_time_;
 };
 
 } // namespace project11_navigation

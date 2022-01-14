@@ -15,6 +15,7 @@ Navigator::Navigator()
 
   ROS_INFO_STREAM("Controller frequency: " << controller_frequency_ << " period: " << controller_period);
 
+  ros::param::param("~base_frame", base_frame_, base_frame_);
 
   context_ = Context::Ptr(new Context);
   robot_ = std::shared_ptr<Robot>(new Robot(context_));
@@ -54,6 +55,18 @@ void Navigator::iterate(const ros::TimerEvent& event)
   {
     geometry_msgs::TwistStamped cmd_vel;
     cmd_vel.header.stamp = ros::Time::now();
+    if(!base_frame_.empty())
+      cmd_vel.header.frame_id = base_frame_;
+    else
+    {
+      auto odom = context_->getOdometry();
+      if(odom.child_frame_id.empty())
+      {
+        ROS_INFO_STREAM_THROTTLE(1.0, "Waiting for odom with non-empty child_frame_id");
+        return;
+      }
+      cmd_vel.header.frame_id = odom.child_frame_id;
+    }
     task_manager_->getResult(cmd_vel);
     robot_->sendControls(cmd_vel);
   }
