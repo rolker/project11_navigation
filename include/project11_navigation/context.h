@@ -9,10 +9,11 @@
 
 namespace project11_navigation
 {
-
+class PluginLoader;
 class Robot;
 class Task;
 class TaskWrapper;
+
 
 // Assembles the relevant data for accomplishing navigation tasks.
 class Context
@@ -30,6 +31,10 @@ public:
   geometry_msgs::PoseStamped getPoseInFrame(std::string frame_id);
 
   std::shared_ptr<TaskWrapper> getTaskWrapper(std::shared_ptr<Task> task);
+
+  std::shared_ptr<PluginLoader> pluginLoader();
+
+
 private:
   void updateRobotCapabilities(const RobotCapabilities& robot_capabilities);
   void updateOdometry(const nav_msgs::Odometry& odom);
@@ -47,7 +52,11 @@ private:
   tf2_ros::Buffer tf_buffer_;
   tf2_ros::TransformListener tf_listener_;
 
+  std::shared_ptr<PluginLoader> plugin_loader_;
+
   friend class Robot;
+
+
 };
 
 } // namespace project11_navigation

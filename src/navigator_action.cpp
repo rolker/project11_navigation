@@ -46,6 +46,7 @@ void NavigatorAction::done()
 {
   if(action_server_.isActive())
   {
+    ROS_INFO_STREAM("We are done");
     RunTasksResult result;
     if(task_list_)
       result.tasks = task_list_->taskMessages();

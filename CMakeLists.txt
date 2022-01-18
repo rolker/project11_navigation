@@ -40,6 +40,7 @@ set(NAVIGATOR_SOURCES
   src/navigator.cpp
   src/navigator_action.cpp
   src/platform.cpp
+  src/plugin_loader.cpp
   src/robot.cpp
   src/task.cpp
   src/tasklist.cpp
@@ -53,6 +54,7 @@ set(NAVIGATOR_SOURCES
   src/workflows/nav_core.cpp
   src/workflows/task_connector.cpp
   src/workflows/task_manager.cpp
+  src/workflows/task_to_twist_stack.cpp
 )
 
 add_executable(navigator ${NAVIGATOR_SOURCES})

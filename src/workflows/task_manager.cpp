@@ -36,7 +36,11 @@ void TaskManager::setGoal(const std::shared_ptr<TaskList>& input)
 bool TaskManager::running()
 {
   updateCurrentTask();
-  return executive_->running();
+  while(current_task_ && !executive_->running())
+    updateCurrentTask();
+  if(task_list_)
+    return !task_list_->allDone();
+  return false;
 }
 
 bool TaskManager::getResult(geometry_msgs::TwistStamped& output)
