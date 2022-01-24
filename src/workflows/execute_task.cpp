@@ -82,17 +82,25 @@ bool ExecuteTask::updateCurrentHandler()
     {
       auto old_nav_task = current_nav_task_;
       current_nav_task_ = tw->getCurrentNavigationTask();
-      if(current_nav_task_ != old_nav_task)
+      if(current_nav_task_)
       {
-        ROS_INFO_STREAM("Current nav task:" << current_nav_task_->message());
-        current_handler_= task_handlers_[current_nav_task_->message().type];
-        if(current_handler_)
-          current_handler_->setGoal(current_nav_task_);
-        else
+        if(current_nav_task_ != old_nav_task)
         {
-          current_nav_task_->setStatus("Skipped by ExecuteTask");
-          current_nav_task_->setDone();
+          ROS_INFO_STREAM("Current nav task:" << current_nav_task_->message());
+          current_handler_= task_handlers_[current_nav_task_->message().type];
+          if(current_handler_)
+            current_handler_->setGoal(current_nav_task_);
+          else
+          {
+            current_nav_task_->setStatus("Skipped by ExecuteTask");
+            current_nav_task_->setDone();
+          }
         }
+      }
+      else
+      {
+        current_handler_.reset();
+        current_task_->setDone();  
       }
     }
     else

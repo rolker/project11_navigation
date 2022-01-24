@@ -42,11 +42,12 @@ void SurveyAreaTask::updateTransit(const geometry_msgs::PoseStamped& from_pose, 
   auto survey_line = task_->getFirstChildOfType("survey_line");
   if(survey_line)
   {
-    auto slw = context_->getTaskWrapper(survey_line);
-    slw->updateTransit(from_pose, out_pose);
-    survey_line = task_->getLastChildOfType("survey_line");
-    if(!survey_line->message().poses.empty())
-      out_pose = survey_line->message().poses.back();
+    while(survey_line)
+    {
+      auto slw = context_->getTaskWrapper(survey_line);
+      slw->updateTransit(from_pose, out_pose);
+      survey_line = task_->getNextChildOfType(survey_line);
+    }
     return;
   }
 
@@ -68,8 +69,23 @@ std::shared_ptr<Task> SurveyAreaTask::getCurrentNavigationTask()
   auto transit_to = task_->getFirstChildOfTypeAndID("transit","transit_to");
   if(transit_to && !transit_to->done())
     return transit_to;
-  // TODO send next line or transit
-  return std::shared_ptr<Task>();
+
+  auto next_task = task_->getFirstUndoneChildTask();
+  while(next_task)
+  {
+    auto tw = context_->getTaskWrapper(next_task);
+    if(tw)
+    {
+      auto nav_task = tw->getCurrentNavigationTask();
+      if(nav_task)
+        return nav_task;
+    }
+    next_task->setStatus("Skipped be SurveyAreaTask");
+    next_task->setDone();
+    next_task = task_->getFirstUndoneChildTask();
+  }
+
+  return task_;
 }
 
 

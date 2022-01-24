@@ -17,6 +17,8 @@ public:
   const project11_nav_msgs::Task& message() const;
   bool done(bool recursive=false) const;
 
+  bool hasChildren() const;
+
   void setDone();
   void setStatus(std::string status);
   void setChildID(std::shared_ptr<Task> task, std::string id);
@@ -30,7 +32,9 @@ public:
   bool getLastPose(geometry_msgs::PoseStamped& pose, bool recursive = false) const;
 
   std::shared_ptr<Task> getFirstChildTask() const;
+  std::shared_ptr<Task> getFirstUndoneChildTask() const;
   std::shared_ptr<Task> getFirstChildOfType(std::string type) const;
+  std::shared_ptr<Task> getNextChildOfType(std::shared_ptr<Task> task) const;
   std::shared_ptr<Task> getLastChildOfType(std::string type) const;
   std::shared_ptr<Task> getFirstChildOfTypeAndID(std::string type, std::string id) const;
 

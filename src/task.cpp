@@ -66,6 +66,11 @@ bool Task::done(bool recursive) const
   return message_.done;
 }
 
+bool Task::hasChildren() const
+{
+  return !children_.tasks().empty();
+}
+
 ros::Time Task::lastUpdateTime() const
 {
   return last_update_time_;  
@@ -105,10 +110,21 @@ std::shared_ptr<Task> Task::getFirstChildTask() const
   return children_.getFirstTask();
 }
 
+std::shared_ptr<Task> Task::getFirstUndoneChildTask() const
+{
+  return children_.getFirstUndoneTask();
+}
+
 std::shared_ptr<Task> Task::getFirstChildOfType(std::string type) const
 {
   return children_.getFirstTaskOfType(type);
 }
+
+std::shared_ptr<Task> Task::getNextChildOfType(std::shared_ptr<Task> task) const
+{
+  return children_.getNextTaskOfType(task);
+}
+
 
 std::shared_ptr<Task> Task::getLastChildOfType(std::string type) const
 {

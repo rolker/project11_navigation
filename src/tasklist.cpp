@@ -108,6 +108,15 @@ std::shared_ptr<Task> TaskList::getFirstTask() const
   return std::shared_ptr<Task>();
 }
 
+std::shared_ptr<Task> TaskList::getFirstUndoneTask() const
+{
+  for(auto t: tasks_)
+    if(!t->done())
+      return t;
+  return std::shared_ptr<Task>();
+}
+
+
 std::shared_ptr<Task> TaskList::getNextTask(std::shared_ptr<Task> task) const
 {
   if(!task)
@@ -187,6 +196,21 @@ std::shared_ptr<Task> TaskList::getFirstTaskOfType(std::string type) const
   for(auto t: tasks_)
     if(t->message().type == type)
       return t;
+  return std::shared_ptr<Task>();
+}
+
+std::shared_ptr<Task> TaskList::getNextTaskOfType(std::shared_ptr<Task> task) const
+{
+  if(task)
+  {
+    auto type = task->message().type;
+    while(task)
+    {
+      task = getNextTask(task);
+      if(task && task->message().type == type)
+        return task;
+    }
+  }
   return std::shared_ptr<Task>();
 }
 
