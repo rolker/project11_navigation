@@ -2,6 +2,7 @@
 #include <ros/ros.h>
 #include <project11_navigation/robot.h>
 #include <project11_navigation/workflows/task_manager.h>
+#include <project11_navigation/plugins_loader.h>
 
 namespace project11_navigation
 {
@@ -18,6 +19,8 @@ Navigator::Navigator()
   ros::param::param("~base_frame", base_frame_, base_frame_);
 
   context_ = Context::Ptr(new Context);
+  context_->pluginsLoader()->configure(context_);
+
   robot_ = std::shared_ptr<Robot>(new Robot(context_));
 
   task_manager_ = std::make_shared<TaskManager>();

@@ -2,7 +2,7 @@
 #include <project11_navigation/workflows/nav_core.h>
 #include <project11_navigation/interfaces/task_wrapper.h>
 #include <project11_navigation/workflows/task_to_twist_stack.h>
-#include <project11_navigation/plugin_loader.h>
+#include <project11_navigation/plugins_loader.h>
 
 namespace project11_navigation
 {
@@ -20,23 +20,11 @@ ExecuteTask::~ExecuteTask()
 void ExecuteTask::configure(std::string name, Context::Ptr context)
 {
   context_ = context;
-  task_handlers_["transit"] = boost::make_shared<NavCore>();
-  task_handlers_["transit"]->configure("nav_core", context);
 
-  auto loader = context_->pluginLoader();
+  auto loader = context_->pluginsLoader();
 
-  std::string hover_handler = "hover/Hover";
-  try
-  {
-    auto handler = loader->task_to_twist_loader_.createInstance(hover_handler);
-    handler->configure(loader->task_to_twist_loader_.getName(hover_handler), context);
-    task_handlers_["hover"] = handler;
-  }
-  catch(const std::exception& e)
-  {
-    ROS_FATAL("Failed to create the %s planner, are you sure it is properly registered and that the containing library is built? Exception: %s", hover_handler.c_str(), e.what());
-    exit(1);
-  }
+  task_handlers_["transit"] = loader->getTaskToTwistPlugin("transit");
+  task_handlers_["hover"] = loader->getTaskToTwistPlugin("hover");
 
   task_handlers_["survey_line"] = boost::make_shared<TaskToTwistStack>();
   task_handlers_["survey_line"]->configure("survey_line", context);

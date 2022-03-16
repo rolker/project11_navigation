@@ -1,7 +1,7 @@
 #include <project11_navigation/context.h>
 #include "tf2_geometry_msgs/tf2_geometry_msgs.h"
 #include <project11_navigation/interfaces/task_wrapper.h>
-#include <project11_navigation/plugin_loader.h>
+#include <project11_navigation/plugins_loader.h>
 
 #include <project11_navigation/tasks/generic.h>
 #include <project11_navigation/tasks/hover.h>
@@ -14,7 +14,7 @@ namespace project11_navigation
 
 Context::Context():
   tf_listener_(tf_buffer_),
-  plugin_loader_(new PluginLoader())
+  plugins_loader_(new PluginsLoader())
 {
   
 }
@@ -37,9 +37,9 @@ bool Context::getOutputEnabled()
   return output_enabled_;
 }
 
-std::shared_ptr<PluginLoader> Context::pluginLoader()
+std::shared_ptr<PluginsLoader> Context::pluginsLoader()
 {
-  return plugin_loader_;
+  return plugins_loader_;
 }
 
 void Context::updateRobotCapabilities(const RobotCapabilities& robot_capabilities)

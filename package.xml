@@ -21,5 +21,6 @@
   <depend>tf2</depend>
   
   <export>
+    <project11_navigation plugin="${prefix}/plugins.xml"/>
   </export>
 </package>

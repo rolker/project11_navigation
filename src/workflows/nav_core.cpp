@@ -3,6 +3,9 @@
 #include <ros/ros.h>
 #include <project11_navigation/utilities.h>
 #include <nav_msgs/Path.h>
+#include <pluginlib/class_list_macros.h>
+
+PLUGINLIB_EXPORT_CLASS(project11_navigation::NavCore, project11_navigation::TaskToTwistWorkflow)
 
 namespace project11_navigation
 {

@@ -24,7 +24,7 @@ generate_messages(DEPENDENCIES actionlib_msgs project11_nav_msgs)
 
 catkin_package(
   INCLUDE_DIRS include
-#  LIBRARIES 
+  LIBRARIES project11_navigation_plugins
   CATKIN_DEPENDS actionlib actionlib_msgs costmap_2d geometry_msgs nav_core pluginlib project11_nav_msgs roscpp rospy tf2
 #  DEPENDS system_lib
 )
@@ -40,7 +40,7 @@ set(NAVIGATOR_SOURCES
   src/navigator.cpp
   src/navigator_action.cpp
   src/platform.cpp
-  src/plugin_loader.cpp
+  src/plugins_loader.cpp
   src/robot.cpp
   src/task.cpp
   src/tasklist.cpp
@@ -51,7 +51,6 @@ set(NAVIGATOR_SOURCES
   src/tasks/survey_line.cpp
   src/tasks/transit.cpp
   src/workflows/execute_task.cpp
-  src/workflows/nav_core.cpp
   src/workflows/task_connector.cpp
   src/workflows/task_manager.cpp
   src/workflows/task_to_twist_stack.cpp
@@ -65,9 +64,21 @@ target_link_libraries(navigator
     ${catkin_LIBRARIES}
 )
 
+set(PLUGIN_SOURCES
+  src/workflows/nav_core.cpp
+)
+
+add_library(project11_navigation_plugins ${PLUGIN_SOURCES})
+add_dependencies(project11_navigation_plugins ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(project11_navigation_plugins ${catkin_LIBRARIES})
+
 install(TARGETS navigator
    ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
    LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
    RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+
+install(FILES plugins.xml
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 )
 

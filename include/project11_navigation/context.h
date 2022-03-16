@@ -9,7 +9,7 @@
 
 namespace project11_navigation
 {
-class PluginLoader;
+class PluginsLoader;
 class Robot;
 class Task;
 class TaskWrapper;
@@ -32,7 +32,7 @@ public:
 
   std::shared_ptr<TaskWrapper> getTaskWrapper(std::shared_ptr<Task> task);
 
-  std::shared_ptr<PluginLoader> pluginLoader();
+  std::shared_ptr<PluginsLoader> pluginsLoader();
 
 
 private:
@@ -52,7 +52,7 @@ private:
   tf2_ros::Buffer tf_buffer_;
   tf2_ros::TransformListener tf_listener_;
 
-  std::shared_ptr<PluginLoader> plugin_loader_;
+  std::shared_ptr<PluginsLoader> plugins_loader_;
 
   friend class Robot;
 

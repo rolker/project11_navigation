@@ -1,0 +1,7 @@
+<library path="lib/libproject11_navigation_plugins">
+  <class name="project11_navigation/NavCore" type="project11_navigation::NavCore" base_class_type="project11_navigation::TaskToTwistWorkflow">
+    <description>
+      Project11 Navigation plugin supporting ROS nav core pluggins.
+    </description>
+  </class>
+</library>
