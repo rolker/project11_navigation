@@ -133,7 +133,7 @@ std::shared_ptr<Task> TaskList::getNextTask(std::shared_ptr<Task> task) const
   return std::shared_ptr<Task>();
 }
 
-std::shared_ptr<Task> TaskList::createTaskBefore(std::shared_ptr<Task> task)
+std::shared_ptr<Task> TaskList::createTaskBefore(std::shared_ptr<Task> task, std::string type)
 {
   auto task_iterator = tasks_.begin();
   while(task && task_iterator != tasks_.end() && *task_iterator != task)
@@ -145,6 +145,7 @@ std::shared_ptr<Task> TaskList::createTaskBefore(std::shared_ptr<Task> task)
   {
     // we found the target task
     project11_nav_msgs::Task tm;
+    tm.type = type;
     if(task)
       tm.priority = task->message().priority;
     ret = std::make_shared<Task>(tm);

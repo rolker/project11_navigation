@@ -13,6 +13,7 @@ public:
   geometry_msgs::PoseStamped expectedEndPose(const geometry_msgs::PoseStamped& starting_pose) override;
   void updateTransit(const geometry_msgs::PoseStamped& from_pose, geometry_msgs::PoseStamped& out_pose) override;
   std::shared_ptr<Task> getCurrentNavigationTask() override;
+  void configure(std::string name, std::shared_ptr<Context> context) override;
 };
 
 } // namespace project11_navigation

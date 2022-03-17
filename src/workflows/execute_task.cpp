@@ -3,6 +3,9 @@
 #include <project11_navigation/interfaces/task_wrapper.h>
 #include <project11_navigation/workflows/task_to_twist_stack.h>
 #include <project11_navigation/plugins_loader.h>
+#include <pluginlib/class_list_macros.h>
+
+PLUGINLIB_EXPORT_CLASS(project11_navigation::ExecuteTask, project11_navigation::TaskToTwistWorkflow)
 
 namespace project11_navigation
 {
@@ -21,14 +24,13 @@ void ExecuteTask::configure(std::string name, Context::Ptr context)
 {
   context_ = context;
 
-  auto loader = context_->pluginsLoader();
-
-  task_handlers_["transit"] = loader->getTaskToTwistPlugin("transit");
-  task_handlers_["hover"] = loader->getTaskToTwistPlugin("hover");
-
-  task_handlers_["survey_line"] = boost::make_shared<TaskToTwistStack>();
-  task_handlers_["survey_line"]->configure("survey_line", context);
-
+  XmlRpc::XmlRpcValue parameters;
+  if(ros::param::get("~"+name, parameters))
+  {
+    if(parameters.hasMember("handlers"))
+      for(auto h: parameters["handlers"])
+        task_handlers_[h.first] = std::string(h.second);
+  }
 }
 
 void ExecuteTask::setGoal(const std::shared_ptr<Task>& input)
@@ -75,12 +77,18 @@ bool ExecuteTask::updateCurrentHandler()
         if(current_nav_task_ != old_nav_task)
         {
           ROS_INFO_STREAM("Current nav task:" << current_nav_task_->message());
-          current_handler_= task_handlers_[current_nav_task_->message().type];
+          std::string task_type = current_nav_task_->message().type;
+          if(task_handlers_.find(task_type) != task_handlers_.end())
+            current_handler_ = context_->pluginsLoader()->getPlugin<TaskToTwistWorkflow>(task_handlers_[task_type]);
+          else
+            current_handler_ = context_->pluginsLoader()->getPlugin<TaskToTwistWorkflow>(task_type);
           if(current_handler_)
             current_handler_->setGoal(current_nav_task_);
           else
           {
-            current_nav_task_->setStatus("Skipped by ExecuteTask");
+            auto status = current_nav_task_->status();
+            status["skipped"] = "Skipped by ExecuteTask";
+            current_nav_task_->setStatus(status);
             current_nav_task_->setDone();
           }
         }
@@ -94,7 +102,9 @@ bool ExecuteTask::updateCurrentHandler()
     else
     {
       current_handler_.reset();
-      current_task_->setStatus("Skipped by ExecuteTask");
+      auto status = current_task_->status();
+      status["skipped"] = "Skipped by ExecuteTask";
+      current_task_->setStatus(status);
       current_task_->setDone();
     }
   }

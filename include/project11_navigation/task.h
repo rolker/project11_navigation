@@ -2,6 +2,7 @@
 #define PROJECT11_NAVIGATION_TASK_H
 
 #include <project11_navigation/tasklist.h>
+#include <yaml-cpp/yaml.h>
 
 namespace project11_navigation
 {
@@ -20,9 +21,15 @@ public:
   bool hasChildren() const;
 
   void setDone();
-  void setStatus(std::string status);
   void setChildID(std::shared_ptr<Task> task, std::string id);
   void setID(std::string id);
+
+
+  YAML::Node data() const;
+  void setData(const YAML::Node& data);
+
+  YAML::Node status() const;
+  void setStatus(const YAML::Node &status);
 
   ros::Time lastUpdateTime() const;
 
@@ -37,8 +44,9 @@ public:
   std::shared_ptr<Task> getNextChildOfType(std::shared_ptr<Task> task) const;
   std::shared_ptr<Task> getLastChildOfType(std::string type) const;
   std::shared_ptr<Task> getFirstChildOfTypeAndID(std::string type, std::string id) const;
+  std::shared_ptr<Task> getFirstChildOfTypeAndIDOrCreate(std::string type, std::string id);
 
-  std::shared_ptr<Task> createChildTaskBefore(std::shared_ptr<Task> task = std::shared_ptr<Task>());
+  std::shared_ptr<Task> createChildTaskBefore(std::shared_ptr<Task> task = std::shared_ptr<Task>(), std::string type = "");
 
   void updateTransitTo(const geometry_msgs::PoseStamped& from_pose);
 

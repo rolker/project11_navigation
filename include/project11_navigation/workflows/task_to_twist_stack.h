@@ -21,8 +21,12 @@ public:
   bool running() override;
   bool getResult(geometry_msgs::TwistStamped& output) override;
 private:
+  void iterate();
+  
   Context::Ptr context_;
   std::shared_ptr<Task> current_task_;
+
+  std::vector<std::shared_ptr<Task> > sub_tasks_;
 
   std::vector<boost::shared_ptr<TaskToTaskWorkflow> > steps_;
   boost::shared_ptr<TaskToTwistWorkflow> last_step_;

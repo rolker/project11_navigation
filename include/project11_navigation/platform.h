@@ -12,6 +12,7 @@ class Platform
 {
 public:
   Platform();
+  std::string baseFrame() const;
 
 protected:
   ros::NodeHandle nodeHandle_;

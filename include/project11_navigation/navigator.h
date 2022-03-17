@@ -30,11 +30,9 @@ private:
   std::shared_ptr<Robot> robot_;
   std::shared_ptr<Context> context_;
 
-
   double controller_frequency_ = 10.0;
-  std::string base_frame_;
 
-  std::shared_ptr<TaskListToTwistWorkflow> task_manager_;
+  boost::shared_ptr<TaskListToTwistWorkflow> task_manager_;
 
   // Task list as provided by the user
   std::vector<project11_nav_msgs::Task> task_messages_;

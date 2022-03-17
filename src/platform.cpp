@@ -14,6 +14,11 @@ void Platform::odometryCallback(const nav_msgs::Odometry::ConstPtr& msg)
   odometryUpdated();
 }
 
+std::string Platform::baseFrame() const
+{
+  return odom_.child_frame_id;
+}
+
 void Platform::odometryUpdated()
 {
   

@@ -3,6 +3,9 @@
 
 #include "project11_navigation/interfaces/task_to_task_workflow.h"
 #include "project11_navigation/interfaces/task_to_twist_workflow.h"
+#include "project11_navigation/interfaces/tasklist_to_tasklist_workflow.h"
+#include "project11_navigation/interfaces/tasklist_to_twist_workflow.h"
+#include "project11_navigation/interfaces/task_wrapper.h"
 #include <pluginlib/class_loader.h>
 
 
@@ -14,16 +17,63 @@ class PluginsLoader
 public:
   PluginsLoader();
 
-  boost::shared_ptr<TaskToTaskWorkflow> getTaskToTaskPlugin(std::string name);
-  boost::shared_ptr<TaskToTwistWorkflow> getTaskToTwistPlugin(std::string name);
+  template<typename T> boost::shared_ptr<T> getPlugin(std::string name)
+  {
+    std::shared_ptr<PluginType<T> > pt = std::dynamic_pointer_cast<PluginType<T> >(plugins_[typeid(T)]);
+    if(pt->plugins.find(name) != pt->plugins.end())
+      return pt->plugins[name];
+    return boost::shared_ptr<T>();
+  }
 
   void configure(std::shared_ptr<Context> context);
 
 private:
-  template<typename T> struct PluginType
+  template<typename T> void addType(std::string base_class)
   {
-    PluginType(std::string package, std::string base_class): loader(package, base_class){}
+    plugins_[typeid(T)] = std::make_shared<PluginType<T> >(base_class);
+  }
+
+  template<typename T> void loadPlugins(const XmlRpc::XmlRpcValue& value)
+  {
+    std::shared_ptr<PluginType<T> > pt = std::dynamic_pointer_cast<PluginType<T> >(plugins_[typeid(T)]);
+    if(value.hasMember(pt->base_class))
+    {
+      auto t = value[pt->base_class];
+      for(auto plugin_param: t)
+      {
+        if(plugin_param.second.getType() == XmlRpc::XmlRpcValue::TypeString)
+        {
+          std::string plugin_type = plugin_param.second;
+          if(pt->loader.isClassAvailable(plugin_type))
+            pt->load(plugin_param.first, plugin_type);
+          else
+            ROS_WARN_STREAM("Could not load " << plugin_param.first << " plugin of type " << plugin_type);
+        }
+        else
+          ROS_WARN_STREAM("value for " << plugin_param.first << " is not a string type");
+      }
+    }
+  }
+
+  template<typename T> void configureType(std::shared_ptr<Context> context)
+  {
+    std::shared_ptr<PluginType<T> > pt = std::dynamic_pointer_cast<PluginType<T> >(plugins_[typeid(T)]); 
+    for(auto p: pt->plugins)
+      p.second->configure(pt->base_class+"/"+p.first, context);
+  }
+
+
+  struct PluginTypeBase
+  {
+    PluginTypeBase() {};
+    virtual ~PluginTypeBase() {};
+  };
+
+  template<typename T> struct PluginType: public PluginTypeBase
+  {
+    PluginType(std::string base_class): loader("project11_navigation", "project11_navigation::"+base_class),base_class(base_class){}
     pluginlib::ClassLoader<T> loader;
+    std::string base_class;
     std::map<std::string, boost::shared_ptr<T> > plugins;
     void load(std::string name, std::string type)
     {
@@ -39,8 +89,7 @@ private:
     }
   };
 
-  PluginType<TaskToTaskWorkflow> task_to_task_plugins_;
-  PluginType<TaskToTwistWorkflow> task_to_twist_plugins_;
+  std::map<std::type_index, std::shared_ptr<PluginTypeBase> > plugins_;
 };
 
 } // namespace project11_navigation

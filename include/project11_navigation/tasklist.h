@@ -24,7 +24,7 @@ public:
   bool getFirstPose(geometry_msgs::PoseStamped& pose, bool recursive= false) const;
   bool getLastPose(geometry_msgs::PoseStamped& pose, bool recursive= false) const;
 
-  std::shared_ptr<Task> createTaskBefore(std::shared_ptr<Task> task);
+  std::shared_ptr<Task> createTaskBefore(std::shared_ptr<Task> task, std::string type = "");
   
   bool allDone(bool recursive=false) const;
 

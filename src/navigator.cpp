@@ -16,16 +16,16 @@ Navigator::Navigator()
 
   ROS_INFO_STREAM("Controller frequency: " << controller_frequency_ << " period: " << controller_period);
 
-  ros::param::param("~base_frame", base_frame_, base_frame_);
-
   context_ = Context::Ptr(new Context);
   context_->pluginsLoader()->configure(context_);
 
   robot_ = std::shared_ptr<Robot>(new Robot(context_));
 
-  task_manager_ = std::make_shared<TaskManager>();
+  std::string task_manager_plugin = ros::param::param<std::string>("~task_manager_plugin", "task_manager");
+  task_manager_ = context_->pluginsLoader()->getPlugin<TaskListToTwistWorkflow>(task_manager_plugin);
 
-  task_manager_->configure("task_manager", context_);
+  if(!task_manager_)
+    ROS_FATAL_STREAM("Unable to load toplevel task manager plugin: " << task_manager_plugin);
 
   iterate_timer_ = nodeHandle_.createTimer(ros::Duration(controller_period), &Navigator::iterate, this);
 }
@@ -58,17 +58,11 @@ void Navigator::iterate(const ros::TimerEvent& event)
   {
     geometry_msgs::TwistStamped cmd_vel;
     cmd_vel.header.stamp = ros::Time::now();
-    if(!base_frame_.empty())
-      cmd_vel.header.frame_id = base_frame_;
-    else
+    cmd_vel.header.frame_id = robot_->baseFrame();
+    if(cmd_vel.header.frame_id.empty())
     {
-      auto odom = context_->getOdometry();
-      if(odom.child_frame_id.empty())
-      {
-        ROS_INFO_STREAM_THROTTLE(1.0, "Waiting for odom with non-empty child_frame_id");
-        return;
-      }
-      cmd_vel.header.frame_id = odom.child_frame_id;
+      ROS_INFO_STREAM_THROTTLE(1.0, "Waiting for odom with non-empty child_frame_id");
+      return;
     }
     task_manager_->getResult(cmd_vel);
     robot_->sendControls(cmd_vel);
@@ -77,8 +71,6 @@ void Navigator::iterate(const ros::TimerEvent& event)
   {
     done();
   }
-
-
 }
 
 void Navigator::done()

@@ -42,9 +42,27 @@ void Task::setDone()
   last_update_time_ = ros::Time::now();
 }
 
-void Task::setStatus(std::string status)
+YAML::Node Task::data() const
 {
-  message_.status = status;
+  return YAML::Load(message_.data);
+}
+
+void Task::setData(const YAML::Node& data)
+{
+  std::stringstream ss;
+  ss << data;
+  message_.data = ss.str();
+  last_update_time_ = ros::Time::now();
+}
+
+YAML::Node Task::status() const
+{
+  return YAML::Load(message_.status);
+}
+
+void Task::setStatus(const YAML::Node& status)
+{
+  message_.status = status.as<std::string>();
   last_update_time_ = ros::Time::now();
 }
 
@@ -136,24 +154,27 @@ std::shared_ptr<Task> Task::getFirstChildOfTypeAndID(std::string type, std::stri
   return children_.getFirstTaskOfTypeAndID(type, id);
 }
 
-std::shared_ptr<Task> Task::createChildTaskBefore(std::shared_ptr<Task> task)
+std::shared_ptr<Task> Task::getFirstChildOfTypeAndIDOrCreate(std::string type, std::string id)
 {
-  return children_.createTaskBefore(task);
+  auto ret = children_.getFirstTaskOfTypeAndID(type, id);
+  if(!ret)
+  {
+    ret = createChildTaskBefore(getFirstChildTask(), type);
+    setChildID(ret, id);
+  }
+  return ret;
+}
+
+
+std::shared_ptr<Task> Task::createChildTaskBefore(std::shared_ptr<Task> task, std::string type)
+{
+  return children_.createTaskBefore(task, type);
 }
 
 void Task::updateTransitTo(const geometry_msgs::PoseStamped& in_pose)
 {
-  auto transit = getFirstChildOfTypeAndID("transit","tansit_to");
-  if(!transit)
-  {
-    ROS_INFO_STREAM("creating a transit_to for " << message_.id);
-    transit = createChildTaskBefore(getFirstChildTask());
-    setChildID(transit, "transit_to");
-  }
-  else
-    ROS_INFO_STREAM("transit_to exists for " << message_.id << ", updating");
+  auto transit = getFirstChildOfTypeAndIDOrCreate("transit","tansit_to");
   auto m = transit->message();
-  m.type = "transit";
   m.poses.clear();
   m.poses.push_back(in_pose);
   transit->update(m);

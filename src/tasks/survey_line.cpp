@@ -1,5 +1,8 @@
 #include <project11_navigation/tasks/survey_line.h>
 #include <project11_navigation/utilities.h>
+#include <pluginlib/class_list_macros.h>
+
+PLUGINLIB_EXPORT_CLASS(project11_navigation::SurveyLineTask, project11_navigation::TaskWrapper)
 
 namespace project11_navigation
 {
@@ -75,6 +78,9 @@ std::shared_ptr<Task> SurveyLineTask::getCurrentNavigationTask()
   return task_;
 }
 
-
+void SurveyLineTask::configure(std::string name, std::shared_ptr<Context> context)
+{
+  
+}
 
 } // namespace project11_navigation

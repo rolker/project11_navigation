@@ -3,7 +3,7 @@
 
 #include <project11_navigation/interfaces/tasklist_to_twist_workflow.h>
 #include <project11_navigation/interfaces/tasklist_to_tasklist_workflow.h>
-#include <project11_navigation/workflows/execute_task.h>
+#include <project11_navigation/interfaces/task_to_twist_workflow.h>
 #include <project11_navigation/task.h>
 
 namespace project11_navigation
@@ -22,9 +22,9 @@ private:
 
   Context::Ptr context_;
 
-  std::shared_ptr<TaskListToTaskListWorkflow> task_connector_;
+  boost::shared_ptr<TaskListToTaskListWorkflow> task_connector_;
 
-  std::shared_ptr<TaskToTwistWorkflow> executive_;
+  boost::shared_ptr<TaskToTwistWorkflow> executive_;
 
   std::shared_ptr<TaskList> task_list_;
   std::shared_ptr<Task> current_task_;

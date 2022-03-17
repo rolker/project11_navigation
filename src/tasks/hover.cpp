@@ -1,5 +1,8 @@
 #include <project11_navigation/tasks/hover.h>
 #include <project11_navigation/utilities.h>
+#include <pluginlib/class_list_macros.h>
+
+PLUGINLIB_EXPORT_CLASS(project11_navigation::HoverTask, project11_navigation::TaskWrapper)
 
 namespace project11_navigation
 {
@@ -46,6 +49,11 @@ std::shared_ptr<Task> HoverTask::getCurrentNavigationTask()
   if(transit_to && !transit_to->done())
     return transit_to;
   return task_;
+}
+
+void HoverTask::configure(std::string name, std::shared_ptr<Context> context)
+{
+  
 }
 
 

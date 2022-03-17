@@ -1,4 +1,7 @@
 #include <project11_navigation/tasks/transit.h>
+#include <pluginlib/class_list_macros.h>
+
+PLUGINLIB_EXPORT_CLASS(project11_navigation::TransitTask, project11_navigation::TaskWrapper)
 
 namespace project11_navigation
 {
@@ -26,5 +29,9 @@ std::shared_ptr<Task> TransitTask::getCurrentNavigationTask()
   return task_;
 }
 
+void TransitTask::configure(std::string name, std::shared_ptr<Context> context)
+{
+  
+}
 
 } // namespace project11_navigation

@@ -1,6 +1,9 @@
 #include "project11_navigation/workflows/task_connector.h"
 #include "project11_navigation/utilities.h"
 #include "project11_navigation/interfaces/task_wrapper.h"
+#include <pluginlib/class_list_macros.h>
+
+PLUGINLIB_EXPORT_CLASS(project11_navigation::TaskConnector, project11_navigation::TaskListToTaskListWorkflow)
 
 namespace project11_navigation
 {

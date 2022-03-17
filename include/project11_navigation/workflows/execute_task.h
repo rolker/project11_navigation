@@ -24,11 +24,18 @@ private:
   bool updateCurrentHandler();
 
   Context::Ptr context_;
-  std::map<std::string, boost::shared_ptr<TaskToTwistWorkflow> > task_handlers_;
+  
+  // Maps task types to plugins. If a task type is
+  // not listed, an attempt to use a TaskToTwistWorkflow
+  // plugin with the task type name will be made.
+  // That means an entry is not needed here if the 
+  // plugin to handle a task has the same name as
+  // the task type.
+  std::map<std::string, std::string> task_handlers_;
+  
   std::shared_ptr<Task> current_task_;
   std::shared_ptr<Task> current_nav_task_;
   boost::shared_ptr<TaskToTwistWorkflow> current_handler_;
-
 };
 
 }  // namespace project11_navigation

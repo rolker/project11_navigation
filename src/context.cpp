@@ -16,6 +16,7 @@ Context::Context():
   tf_listener_(tf_buffer_),
   plugins_loader_(new PluginsLoader())
 {
+  default_task_wrapper_ = ros::param::param<std::string>("~default_task_wrapper", default_task_wrapper_);
   
 }
 
@@ -87,23 +88,19 @@ geometry_msgs::PoseStamped Context::getPoseInFrame(std::string frame_id)
   return ret;
 }
 
-std::shared_ptr<TaskWrapper> Context::getTaskWrapper(std::shared_ptr<Task> task)
+boost::shared_ptr<TaskWrapper> Context::getTaskWrapper(std::shared_ptr<Task> task)
 {
-  std::shared_ptr<TaskWrapper> ret;
+  boost::shared_ptr<TaskWrapper> ret;
   if(task)
   {
-    if(task->message().type == "hover")
-      ret = std::make_shared<HoverTask>();
-    else if(task->message().type == "survey_area")
-      ret = std::make_shared<SurveyAreaTask>();
-    else if(task->message().type == "survey_line")
-      ret = std::make_shared<SurveyLineTask>();
-    else if(task->message().type == "transit")
-      ret = std::make_shared<TransitTask>();
-    else
-      ret = std::make_shared<GenericTask>();
-    ret->context_ = this;
-    ret->task_ = task;
+    ret = plugins_loader_->getPlugin<TaskWrapper>(task->message().type);
+    if(!ret)
+      ret = plugins_loader_->getPlugin<TaskWrapper>(default_task_wrapper_);
+    if(ret)
+    {
+      ret->context_ = this;
+      ret->task_ = task;
+    }
   }
   return ret;
 }

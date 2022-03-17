@@ -1,6 +1,10 @@
 #include "project11_navigation/workflows/task_manager.h"
-#include "project11_navigation/workflows/task_connector.h"
+#include "project11_navigation/context.h"
+#include "project11_navigation/plugins_loader.h"
 #include <queue>
+#include <pluginlib/class_list_macros.h>
+
+PLUGINLIB_EXPORT_CLASS(project11_navigation::TaskManager, project11_navigation::TaskListToTwistWorkflow)
 
 namespace project11_navigation
 {
@@ -8,10 +12,8 @@ namespace project11_navigation
 void TaskManager::configure(std::string name, Context::Ptr context)
 {
   context_ = context;
-  task_connector_ = std::make_shared<TaskConnector>();
-  task_connector_->configure("task_connector", context);
-  executive_ = std::make_shared<ExecuteTask>();
-  executive_->configure("executive", context);
+  task_connector_ = context_->pluginsLoader()->getPlugin<TaskListToTaskListWorkflow>("task_connector");
+  executive_ = context_->pluginsLoader()->getPlugin<TaskToTwistWorkflow>("executive");
 }
 
 void TaskManager::setGoal(const std::shared_ptr<TaskList>& input)

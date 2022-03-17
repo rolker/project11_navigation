@@ -1,5 +1,8 @@
 #include <project11_navigation/tasks/generic.h>
 #include <project11_navigation/utilities.h>
+#include <pluginlib/class_list_macros.h>
+
+PLUGINLIB_EXPORT_CLASS(project11_navigation::GenericTask, project11_navigation::TaskWrapper)
 
 namespace project11_navigation
 {
@@ -46,6 +49,11 @@ std::shared_ptr<Task> GenericTask::getCurrentNavigationTask()
   if(transit_to && !transit_to->done())
     return transit_to;
   return std::shared_ptr<Task>();
+}
+
+void GenericTask::configure(std::string name, std::shared_ptr<Context> context)
+{
+  
 }
 
 } // namespace project11_navigation

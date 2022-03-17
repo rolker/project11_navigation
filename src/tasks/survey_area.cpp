@@ -1,6 +1,9 @@
 #include <project11_navigation/tasks/survey_area.h>
 #include <project11_navigation/utilities.h>
 #include <project11_navigation/context.h>
+#include <pluginlib/class_list_macros.h>
+
+PLUGINLIB_EXPORT_CLASS(project11_navigation::SurveyAreaTask, project11_navigation::TaskWrapper)
 
 namespace project11_navigation
 {
@@ -80,7 +83,9 @@ std::shared_ptr<Task> SurveyAreaTask::getCurrentNavigationTask()
       if(nav_task)
         return nav_task;
     }
-    next_task->setStatus("Skipped be SurveyAreaTask");
+    auto status = next_task->status();
+    status["skipped"] = "Skipped by SurveyAreaTask";
+    next_task->setStatus(status);
     next_task->setDone();
     next_task = task_->getFirstUndoneChildTask();
   }
@@ -88,6 +93,10 @@ std::shared_ptr<Task> SurveyAreaTask::getCurrentNavigationTask()
   return task_;
 }
 
+void SurveyAreaTask::configure(std::string name, std::shared_ptr<Context> context)
+{
+  
+}
 
 
 } // namespace project11_navigation

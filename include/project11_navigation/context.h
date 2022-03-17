@@ -30,7 +30,7 @@ public:
   tf2_ros::Buffer& tfBuffer();
   geometry_msgs::PoseStamped getPoseInFrame(std::string frame_id);
 
-  std::shared_ptr<TaskWrapper> getTaskWrapper(std::shared_ptr<Task> task);
+  boost::shared_ptr<TaskWrapper> getTaskWrapper(std::shared_ptr<Task> task);
 
   std::shared_ptr<PluginsLoader> pluginsLoader();
 
@@ -53,6 +53,8 @@ private:
   tf2_ros::TransformListener tf_listener_;
 
   std::shared_ptr<PluginsLoader> plugins_loader_;
+
+  std::string default_task_wrapper_ = "generic";
 
   friend class Robot;
 
