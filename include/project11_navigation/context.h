@@ -4,6 +4,7 @@
 #include <nav_msgs/Odometry.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <tf2_ros/transform_listener.h>
+#include <costmap_2d/costmap_2d_ros.h>
 #include <project11_navigation/robot_capabilities.h>
 #include <mutex>
 
@@ -34,6 +35,8 @@ public:
 
   std::shared_ptr<PluginsLoader> pluginsLoader();
 
+  std::shared_ptr<costmap_2d::Costmap2DROS> costmap();
+  void setCostmap(std::shared_ptr<costmap_2d::Costmap2DROS> costmap);
 
 private:
   void updateRobotCapabilities(const RobotCapabilities& robot_capabilities);
@@ -55,6 +58,9 @@ private:
   std::shared_ptr<PluginsLoader> plugins_loader_;
 
   std::string default_task_wrapper_ = "generic";
+
+  std::shared_ptr<costmap_2d::Costmap2DROS> costmap_;
+  std::mutex costmap_mutex_;
 
   friend class Robot;
 

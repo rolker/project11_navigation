@@ -21,6 +21,12 @@ Navigator::Navigator()
 
   robot_ = std::shared_ptr<Robot>(new Robot(context_));
 
+  if(ros::param::has("~costmap"))
+  {
+    auto costmap = std::make_shared<costmap_2d::Costmap2DROS>("costmap", context_->tfBuffer());
+    context_->setCostmap(costmap);
+  }
+
   std::string task_manager_plugin = ros::param::param<std::string>("~task_manager_plugin", "task_manager");
   task_manager_ = context_->pluginsLoader()->getPlugin<TaskListToTwistWorkflow>(task_manager_plugin);
 

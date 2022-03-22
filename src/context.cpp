@@ -61,6 +61,18 @@ void Context::updateOutputEnabled(bool enabled)
   output_enabled_ = enabled;
 }
 
+std::shared_ptr<costmap_2d::Costmap2DROS> Context::costmap()
+{
+  std::lock_guard<std::mutex> lock(costmap_mutex_);
+  return costmap_;
+}
+
+void Context::setCostmap(std::shared_ptr<costmap_2d::Costmap2DROS> costmap)
+{
+  std::lock_guard<std::mutex> lock(costmap_mutex_);
+  costmap_ = costmap;
+}
+
 tf2_ros::Buffer& Context::tfBuffer()
 {
   return tf_buffer_;
