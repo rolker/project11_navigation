@@ -29,6 +29,10 @@ private:
   std::shared_ptr<TaskList> task_list_;
   std::shared_ptr<Task> current_task_;
 
+  ros::Publisher display_pub_;
+  ros::Duration display_interval_;
+  ros::Time last_display_time_;
+
 };
 
 }  // namespace project11_navigation

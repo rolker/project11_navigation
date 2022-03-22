@@ -1,5 +1,7 @@
 #include <project11_navigation/tasks/generic.h>
 #include <project11_navigation/utilities.h>
+#include <project11_navigation/context.h>
+#include <project11_navigation/plugins_loader.h>
 #include <pluginlib/class_list_macros.h>
 
 PLUGINLIB_EXPORT_CLASS(project11_navigation::GenericTask, project11_navigation::TaskWrapper)
@@ -7,34 +9,22 @@ PLUGINLIB_EXPORT_CLASS(project11_navigation::GenericTask, project11_navigation::
 namespace project11_navigation
 {
 
-bool GenericTask::needsTransit(const geometry_msgs::PoseStamped& from, geometry_msgs::PoseStamped& to)
-{
-  geometry_msgs::PoseStamped start_position;
-  if(task_->getFirstPose(start_position));
-  {
-    if(length(vectorBetween(from.pose, start_position.pose))>10.0)
-    {
-      to = start_position;
-      return true;
-    }
-  }
-  return false;
-}
-
-geometry_msgs::PoseStamped GenericTask::expectedEndPose(const geometry_msgs::PoseStamped& starting_pose)
-{
-  if(!task_->message().poses.empty())
-    return task_->message().poses.back();
-  return starting_pose;
-}
-
 void GenericTask::updateTransit(const geometry_msgs::PoseStamped& from_pose, geometry_msgs::PoseStamped& out_pose)
 {
   geometry_msgs::PoseStamped in_pose;
   if(task_->getFirstPose(in_pose))
   {
     if(length(vectorBetween(from_pose.pose, in_pose.pose))>10.0)
-      task_->updateTransitTo(in_pose);
+    {
+      auto transit = task_->updateTransitTo(from_pose, in_pose);
+      auto preview_planner = context_->pluginsLoader()->getPlugin<TaskToTaskWorkflow>("preview");
+      if(preview_planner)
+      {
+        preview_planner->setGoal(transit);
+        std::shared_ptr<Task> plan;
+        preview_planner->getResult(plan);
+      }
+    }
   }
   else 
     in_pose = from_pose;
@@ -45,15 +35,27 @@ void GenericTask::updateTransit(const geometry_msgs::PoseStamped& from_pose, geo
 
 std::shared_ptr<Task> GenericTask::getCurrentNavigationTask()
 {
-  auto transit_to = task_->getFirstChildOfTypeAndID("transit","transit_to");
-  if(transit_to && !transit_to->done())
-    return transit_to;
+  for(auto t: task_->children().tasksByPriority(true))
+  {
+    if(t->message().type == "transit")
+      return t;
+  }
   return std::shared_ptr<Task>();
 }
 
 void GenericTask::configure(std::string name, std::shared_ptr<Context> context)
 {
   
+}
+
+void GenericTask::getPreviewDisplay(visualization_msgs::MarkerArray& marker_array)
+{
+  for(auto t: task_->children().tasksByPriority(true))
+  {
+    auto tw = context_->getTaskWrapper(t);
+    if(tw)
+      tw->getPreviewDisplay(marker_array);
+  }
 }
 
 } // namespace project11_navigation

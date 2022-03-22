@@ -5,6 +5,7 @@ default_task_wrapper: generic
 plugins:
   TaskToTaskWorkflow:
     dubins: dubins_curves/Dubins
+    preview: dubins_curves/Dubins
   TaskToTwistWorkflow:
     executive: project11_navigation/ExecuteTask
     transit: project11_navigation/TaskToTwistStack
@@ -17,6 +18,7 @@ plugins:
     task_manager: project11_navigation/TaskManager
   TaskWrapper:
     generic: project11_navigation/GenericTask
+    goto: project11_navigation/GotoTask
     hover: project11_navigation/HoverTask
     survey_area: project11_navigation/SurveyAreaTask
     survey_line: project11_navigation/SurveyLineTask
@@ -26,6 +28,12 @@ TaskToTwistWorkflow/executive:
   handlers:
     foo: bar
 
+TaskToTwistWorkflow/path_follower:
+  pid:
+    upper_limit: 90
+    lower_limit: -90
+    windup_limit: 50
+
 TaskToTwistWorkflow/transit:
   steps:
     - dubins
@@ -33,3 +41,6 @@ TaskToTwistWorkflow/transit:
 
 TaskToTwistWorkflow/survey_line:
   last_step: path_follower
+
+TaskToTaskWorkflow/preview:
+  output_task_name: preview_trajectory

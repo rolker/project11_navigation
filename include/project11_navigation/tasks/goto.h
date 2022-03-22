@@ -1,12 +1,12 @@
-#ifndef PROJECT11_NAVIGATION_TASKS_TRANSIT_H
-#define PROJECT11_NAVIGATION_TASKS_TRANSIT_H
+#ifndef PROJECT11_NAVIGATION_TASKS_GOTO_H
+#define PROJECT11_NAVIGATION_TASKS_GOTO_H
 
 #include <project11_navigation/interfaces/task_wrapper.h>
 
 namespace project11_navigation
 {
 
-class TransitTask: public TaskWrapper
+class GotoTask: public TaskWrapper
 {
 public:
   void updateTransit(const geometry_msgs::PoseStamped& from_pose, geometry_msgs::PoseStamped& out_pose) override;

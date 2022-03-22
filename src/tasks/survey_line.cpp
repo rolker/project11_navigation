@@ -1,41 +1,12 @@
 #include <project11_navigation/tasks/survey_line.h>
 #include <project11_navigation/utilities.h>
+#include <project11_navigation/context.h>
 #include <pluginlib/class_list_macros.h>
 
 PLUGINLIB_EXPORT_CLASS(project11_navigation::SurveyLineTask, project11_navigation::TaskWrapper)
 
 namespace project11_navigation
 {
-
-bool SurveyLineTask::needsTransit(const geometry_msgs::PoseStamped& from, geometry_msgs::PoseStamped& to)
-{
-  if(task_->message().poses.size() >= 2)
-  {
-    auto first_segment_direction_vector = normalize(vectorBetween(task_->message().poses[0].pose, task_->message().poses[1].pose));
-
-    // TODO: get this from a parameter
-    double lead_in_distance = 25.0;
-
-    geometry_msgs::PoseStamped start_position = task_->message().poses[0];
-    start_position.pose.position.x -= first_segment_direction_vector.x*lead_in_distance;
-    start_position.pose.position.y -= first_segment_direction_vector.y*lead_in_distance;
-    start_position.pose.position.z -= first_segment_direction_vector.z*lead_in_distance;
-
-    if(length(vectorBetween(from.pose, start_position.pose))>10.0)
-    {
-      to = start_position;
-      return true;
-    }
-  }
-  return false;
-}
-
-geometry_msgs::PoseStamped SurveyLineTask::expectedEndPose(const geometry_msgs::PoseStamped& starting_pose)
-{
-  if(!task_->message().poses.empty())
-    return task_->message().poses.back();
-  return starting_pose;
-}
 
 void SurveyLineTask::updateTransit(const geometry_msgs::PoseStamped& from_pose, geometry_msgs::PoseStamped& out_pose)
 {
@@ -52,7 +23,7 @@ void SurveyLineTask::updateTransit(const geometry_msgs::PoseStamped& from_pose, 
     in_pose.pose.position.z -= first_segment_direction_vector.z*lead_in_distance;
 
     if(length(vectorBetween(from_pose.pose, in_pose.pose))>10.0)
-      task_->updateTransitTo(in_pose);
+      task_->updateTransitTo(from_pose, in_pose);
   }
   else
   {
@@ -60,21 +31,22 @@ void SurveyLineTask::updateTransit(const geometry_msgs::PoseStamped& from_pose, 
     if(task_->getFirstPose(in_pose))
     {
       if(length(vectorBetween(from_pose.pose, in_pose.pose))>10.0)
-        task_->updateTransitTo(in_pose);
+        task_->updateTransitTo(from_pose, in_pose);
     }
     else 
       in_pose = from_pose;
-
-    if(!task_->getLastPose(out_pose))
-      out_pose = in_pose;
   }
+  if(!task_->getLastPose(out_pose))
+    out_pose = from_pose;
 }
 
 std::shared_ptr<Task> SurveyLineTask::getCurrentNavigationTask()
 {
-  auto transit_to = task_->getFirstChildOfTypeAndID("transit","transit_to");
-  if(transit_to && !transit_to->done())
-    return transit_to;
+  for(auto t: task_->children().tasksByPriority(true))
+  {
+    if(t->message().type == "transit")
+      return t;
+  }
   return task_;
 }
 
@@ -82,5 +54,36 @@ void SurveyLineTask::configure(std::string name, std::shared_ptr<Context> contex
 {
   
 }
+
+void SurveyLineTask::getPreviewDisplay(visualization_msgs::MarkerArray& marker_array)
+{
+  for(auto t: task_->children().tasksByPriority(true))
+  {
+    auto tw = context_->getTaskWrapper(t);
+    if(tw)
+      tw->getPreviewDisplay(marker_array);
+  }
+
+  geometry_msgs::PoseStamped pose;
+  if(task_->getFirstPose(pose))
+  {
+    visualization_msgs::Marker marker;
+    marker.header.frame_id = pose.header.frame_id;
+    marker.header.stamp = ros::Time::now();
+    marker.id = marker_array.markers.size();
+    marker.action = visualization_msgs::Marker::ADD;
+    marker.type = visualization_msgs::Marker::LINE_STRIP;
+    marker.pose.orientation.w = 1.0;
+    marker.color.r = .25;
+    marker.color.g = .4;
+    marker.color.b = .25;
+    marker.color.a = .5;
+    marker.scale.x = 1.0;
+    for(auto p: task_->message().poses)
+      marker.points.push_back(p.pose.position);
+    marker_array.markers.push_back(marker);
+  }
+}
+
 
 } // namespace project11_navigation

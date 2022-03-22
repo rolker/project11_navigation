@@ -78,10 +78,25 @@ std::vector<project11_nav_msgs::Task> TaskList::taskMessages() const
   for(auto t: tasks_)
   {
     ret.push_back(t->message());
-    auto this_children_messages = t->childrenTaskMessages();
+    auto this_children_messages = t->children().taskMessages();
     children_messages.insert(children_messages.end(), this_children_messages.begin(), this_children_messages.end());
   }
   ret.insert(ret.end(), children_messages.begin(), children_messages.end());
+  return ret;
+}
+
+std::vector<std::shared_ptr<Task> > TaskList::tasksByPriority(bool skip_done) const
+{
+  std::map<int, std::vector<std::shared_ptr<Task> > > priority_map;
+  for(auto t: tasks_)
+    if(!skip_done || !t->done())
+      priority_map[t->message().priority].push_back(t);
+
+  std::vector<std::shared_ptr<Task> > ret;
+  for(auto task_list: priority_map)
+    for(auto t: task_list.second)
+      ret.push_back(t);
+
   return ret;
 }
 
@@ -99,38 +114,6 @@ bool TaskList::getLastPose(geometry_msgs::PoseStamped& pose, bool recursive) con
     if(*t && (*t)->getLastPose(pose, recursive))
       return true;
   return false;
-}
-
-std::shared_ptr<Task> TaskList::getFirstTask() const
-{
-  if(!tasks_.empty())
-    return tasks_.front();
-  return std::shared_ptr<Task>();
-}
-
-std::shared_ptr<Task> TaskList::getFirstUndoneTask() const
-{
-  for(auto t: tasks_)
-    if(!t->done())
-      return t;
-  return std::shared_ptr<Task>();
-}
-
-
-std::shared_ptr<Task> TaskList::getNextTask(std::shared_ptr<Task> task) const
-{
-  if(!task)
-    return getFirstTask();
-  auto task_iterator = tasks_.begin();
-  while(task_iterator != tasks_.end())
-  {
-    auto task_to_check = *task_iterator;
-    bool found = (task_to_check && task_to_check->message().id == task->message().id);
-    task_iterator++;
-    if(found && task_iterator != tasks_.end())
-      return *task_iterator;
-  }
-  return std::shared_ptr<Task>();
 }
 
 std::shared_ptr<Task> TaskList::createTaskBefore(std::shared_ptr<Task> task, std::string type)
@@ -190,51 +173,6 @@ bool TaskList::allDone(bool recursive) const
     if(!t->done(recursive))
       return false;
   return true;
-}
-
-std::shared_ptr<Task> TaskList::getFirstTaskOfType(std::string type) const
-{
-  for(auto t: tasks_)
-    if(t->message().type == type)
-      return t;
-  return std::shared_ptr<Task>();
-}
-
-std::shared_ptr<Task> TaskList::getNextTaskOfType(std::shared_ptr<Task> task) const
-{
-  if(task)
-  {
-    auto type = task->message().type;
-    while(task)
-    {
-      task = getNextTask(task);
-      if(task && task->message().type == type)
-        return task;
-    }
-  }
-  return std::shared_ptr<Task>();
-}
-
-std::shared_ptr<Task> TaskList::getFirstTaskOfTypeAndID(std::string type, std::string id) const
-{
-  for(auto t: tasks_)
-    if(t->message().type == type)
-    {
-      auto id_parts = splitChildID(t->message().id);
-      //ROS_INFO_STREAM(id_parts.first << ", " << id_parts.second << " ? " << id);
-      if(id_parts.second == id)
-        return t;
-    }
-  return std::shared_ptr<Task>();
-}
-
-
-std::shared_ptr<Task> TaskList::getLastTaskOfType(std::string type) const
-{
-  for(auto t = tasks_.rbegin(); t != tasks_.rend(); t++)
-    if((*t)->message().type == type)
-      return *t;
-  return std::shared_ptr<Task>();
 }
 
 }  // namespace project11_navigation

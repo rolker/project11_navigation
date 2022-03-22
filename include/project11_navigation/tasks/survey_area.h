@@ -9,11 +9,10 @@ namespace project11_navigation
 class SurveyAreaTask: public TaskWrapper
 {
 public:
-  bool needsTransit(const geometry_msgs::PoseStamped& from, geometry_msgs::PoseStamped& to) override;
-  geometry_msgs::PoseStamped expectedEndPose(const geometry_msgs::PoseStamped& starting_pose) override;
   void updateTransit(const geometry_msgs::PoseStamped& from_pose, geometry_msgs::PoseStamped& out_pose) override;
   std::shared_ptr<Task> getCurrentNavigationTask() override;
   void configure(std::string name, std::shared_ptr<Context> context) override;
+  void getPreviewDisplay(visualization_msgs::MarkerArray& marker_array) override;
 };
 
 } // namespace project11_navigation

@@ -62,7 +62,9 @@ YAML::Node Task::status() const
 
 void Task::setStatus(const YAML::Node& status)
 {
-  message_.status = status.as<std::string>();
+  std::stringstream ss;
+  ss << status;
+  message_.status = ss.str();
   last_update_time_ = ros::Time::now();
 }
 
@@ -84,19 +86,14 @@ bool Task::done(bool recursive) const
   return message_.done;
 }
 
-bool Task::hasChildren() const
+const TaskList& Task::children() const
 {
-  return !children_.tasks().empty();
+  return children_;
 }
 
 ros::Time Task::lastUpdateTime() const
 {
   return last_update_time_;  
-}
-
-std::vector<project11_nav_msgs::Task> Task::childrenTaskMessages() const
-{
-  return children_.taskMessages();
 }
 
 bool Task::getFirstPose(geometry_msgs::PoseStamped& pose, bool recursive) const
@@ -123,61 +120,42 @@ bool Task::getLastPose(geometry_msgs::PoseStamped& pose, bool recursive) const
   return false;
 }
 
-std::shared_ptr<Task> Task::getFirstChildTask() const
-{
-  return children_.getFirstTask();
-}
-
-std::shared_ptr<Task> Task::getFirstUndoneChildTask() const
-{
-  return children_.getFirstUndoneTask();
-}
-
-std::shared_ptr<Task> Task::getFirstChildOfType(std::string type) const
-{
-  return children_.getFirstTaskOfType(type);
-}
-
-std::shared_ptr<Task> Task::getNextChildOfType(std::shared_ptr<Task> task) const
-{
-  return children_.getNextTaskOfType(task);
-}
-
-
-std::shared_ptr<Task> Task::getLastChildOfType(std::string type) const
-{
-  return children_.getLastTaskOfType(type);
-}
-
-std::shared_ptr<Task> Task::getFirstChildOfTypeAndID(std::string type, std::string id) const
-{
-  return children_.getFirstTaskOfTypeAndID(type, id);
-}
-
-std::shared_ptr<Task> Task::getFirstChildOfTypeAndIDOrCreate(std::string type, std::string id)
-{
-  auto ret = children_.getFirstTaskOfTypeAndID(type, id);
-  if(!ret)
-  {
-    ret = createChildTaskBefore(getFirstChildTask(), type);
-    setChildID(ret, id);
-  }
-  return ret;
-}
-
-
 std::shared_ptr<Task> Task::createChildTaskBefore(std::shared_ptr<Task> task, std::string type)
 {
   return children_.createTaskBefore(task, type);
 }
 
-void Task::updateTransitTo(const geometry_msgs::PoseStamped& in_pose)
+std::string Task::getChildID(std::string id) const
 {
-  auto transit = getFirstChildOfTypeAndIDOrCreate("transit","tansit_to");
+  return message_.id+"/"+id;
+}
+
+
+std::shared_ptr<Task> Task::updateTransitTo(const geometry_msgs::PoseStamped& from_pose, const geometry_msgs::PoseStamped& in_pose)
+{
+  std::shared_ptr<Task> transit;
+  for(auto t: children_.tasks())
+  {
+    if (t->message().type == "transit" && t->message().id == getChildID("transit_to"))
+    {
+      transit = t;
+      break;
+    }
+  }
+  if(!transit)
+  {
+    std::shared_ptr<Task> firstChild;
+    if(!children_.tasks().empty())
+      firstChild = children_.tasks().front();
+    transit = createChildTaskBefore(firstChild, "transit");
+    setChildID(transit, "transit_to");
+  }
   auto m = transit->message();
   m.poses.clear();
+  m.poses.push_back(from_pose);
   m.poses.push_back(in_pose);
   transit->update(m);
+  return transit;
 }
 
 }  // namespace project11_navigation

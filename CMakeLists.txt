@@ -15,6 +15,7 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
   tf2
+  visualization_msgs
 )
 
 catkin_python_setup()
@@ -25,7 +26,7 @@ generate_messages(DEPENDENCIES actionlib_msgs project11_nav_msgs)
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES project11_navigation project11_navigation_plugins
-  CATKIN_DEPENDS actionlib actionlib_msgs costmap_2d geometry_msgs nav_core pluginlib project11_nav_msgs roscpp rospy tf2 yaml-cpp
+  CATKIN_DEPENDS actionlib actionlib_msgs costmap_2d geometry_msgs nav_core pluginlib project11_nav_msgs roscpp rospy tf2 visualization_msgs yaml-cpp
 #  DEPENDS system_lib
 )
 
@@ -36,6 +37,7 @@ include_directories(
 
 set(NAVIGATOR_LIB_SOURCES
   src/platform.cpp
+  src/robot_capabilities.cpp
   src/task.cpp
   src/tasklist.cpp
   src/utilities.cpp
@@ -66,6 +68,7 @@ target_link_libraries(navigator
 
 set(PLUGIN_SOURCES
   src/tasks/generic.cpp
+  src/tasks/goto.cpp
   src/tasks/hover.cpp
   src/tasks/survey_area.cpp
   src/tasks/survey_line.cpp

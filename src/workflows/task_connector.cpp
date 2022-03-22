@@ -39,14 +39,13 @@ bool TaskConnector::connectTasks()
     geometry_msgs::PoseStamped start_position;
     start_position.header = odom.header;
     start_position.pose = odom.pose.pose;
-    auto current_task = task_list_->getFirstTask();
-    while(current_task)
+    for(auto t: task_list_->tasksByPriority())
     {
-      ROS_INFO_STREAM("Need transit?\n" << current_task->message());
-      auto tw = context_->getTaskWrapper(current_task);
-      tw->updateTransit(start_position, start_position);
-      current_task = task_list_->getNextTask(current_task);
+      auto tw = context_->getTaskWrapper(t);
+      if(tw)
+        tw->updateTransit(start_position, start_position);
     }
+    
     return true;
   }
   return false;

@@ -14,6 +14,10 @@ void TaskManager::configure(std::string name, Context::Ptr context)
   context_ = context;
   task_connector_ = context_->pluginsLoader()->getPlugin<TaskListToTaskListWorkflow>("task_connector");
   executive_ = context_->pluginsLoader()->getPlugin<TaskToTwistWorkflow>("executive");
+  ros::NodeHandle nh("~/"+name);
+  display_interval_ = ros::Duration(nh.param("display_interval", 1.0));
+  ros::NodeHandle top_nh("~");
+  display_pub_ = top_nh.advertise<visualization_msgs::MarkerArray>("visualization_markers", 10);
 }
 
 void TaskManager::setGoal(const std::shared_ptr<TaskList>& input)
@@ -22,12 +26,8 @@ void TaskManager::setGoal(const std::shared_ptr<TaskList>& input)
   task_connector_->getResult(task_list_);
   if(task_list_)
   {
-    auto t = task_list_->getFirstTask();
-    while(t)
-    {
-      ROS_INFO_STREAM("Task:\n" << t->message());
-      t = task_list_->getNextTask(t);
-    }
+    for(auto t: task_list_->tasks())
+      ROS_INFO_STREAM("Task:\n" << t->message().type << " " << t->message().id);
   }
   else
     ROS_INFO_STREAM("No task list!");
@@ -54,15 +54,13 @@ bool TaskManager::getResult(geometry_msgs::TwistStamped& output)
 void TaskManager::updateCurrentTask()
 {
   auto old_task = current_task_;
-  std::map<int, std::vector<std::shared_ptr<Task> > > todo_list;
+  std::vector<std::shared_ptr<Task> > todo_list;
   if(task_list_)
-    for(auto t: task_list_->tasks())
-      if(!t->done())
-        todo_list[t->message().priority].push_back(t);
+    todo_list = task_list_->tasksByPriority(true);
 
   std::shared_ptr<Task> new_task;
   if(!todo_list.empty())
-    new_task = todo_list.begin()->second.front();
+    new_task = todo_list.front();
 
   if(current_task_ != new_task)
   {
@@ -80,6 +78,21 @@ void TaskManager::updateCurrentTask()
     else
       ROS_INFO_STREAM("new task: none");
   }
+
+  ros::Time now = ros::Time::now();
+  if(!last_display_time_.isValid() || now-last_display_time_ >= display_interval_)
+  {
+    visualization_msgs::MarkerArray marker_array;
+    for(auto t: todo_list)
+    {
+      auto tw = context_->getTaskWrapper(t);
+      if(tw)
+        tw->getPreviewDisplay(marker_array);
+    }
+    display_pub_.publish(marker_array);
+    last_display_time_ = now;
+  }
+
 }
 
 }  // namespace project11_navigation

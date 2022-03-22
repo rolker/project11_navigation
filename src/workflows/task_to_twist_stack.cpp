@@ -66,6 +66,11 @@ void TaskToTwistStack::iterate()
         steps_[i+1]->setGoal(sub_tasks_[i]);
       else
         last_step_->setGoal(sub_tasks_[i]);
+    if(sub_tasks_[i] && sub_tasks_[i]->done())
+      if(i==0)
+        current_task_->setDone();
+      else
+        sub_tasks_[i-1]->setDone();
   }
 }
 

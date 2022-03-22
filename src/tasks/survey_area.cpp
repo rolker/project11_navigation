@@ -8,57 +8,27 @@ PLUGINLIB_EXPORT_CLASS(project11_navigation::SurveyAreaTask, project11_navigatio
 namespace project11_navigation
 {
 
-bool SurveyAreaTask::needsTransit(const geometry_msgs::PoseStamped& from, geometry_msgs::PoseStamped& to)
-{
-  auto survey_line = task_->getFirstChildOfType("survey_line");
-  if(survey_line)
-  {
-    auto slw = context_->getTaskWrapper(survey_line);
-    if(slw)
-      return slw->needsTransit(from, to);
-  }
-
-
-  if(!task_->message().poses.empty())
-  {
-    geometry_msgs::PoseStamped start_position = task_->message().poses[0];
-    if(length(vectorBetween(from.pose, start_position.pose))>10.0)
-    {
-      to = start_position;
-      return true;
-    }
-  }
-  return false;
-}
-
-geometry_msgs::PoseStamped SurveyAreaTask::expectedEndPose(const geometry_msgs::PoseStamped& starting_pose)
-{
-  auto last_line = task_->getLastChildOfType("survey_line");
-  if(last_line)
-    if(!last_line->message().poses.empty())
-      return last_line->message().poses.back();
-  return starting_pose;
-}
-
 void SurveyAreaTask::updateTransit(const geometry_msgs::PoseStamped& from_pose, geometry_msgs::PoseStamped& out_pose)
 {
-  auto survey_line = task_->getFirstChildOfType("survey_line");
-  if(survey_line)
-  {
-    while(survey_line)
+  geometry_msgs::PoseStamped pose = from_pose;
+  bool has_survey_lines = false;
+  for(auto t: task_->children().tasksByPriority())
+    if(t->message().type == "survey_line")
     {
-      auto slw = context_->getTaskWrapper(survey_line);
-      slw->updateTransit(from_pose, out_pose);
-      survey_line = task_->getNextChildOfType(survey_line);
+      auto slw = context_->getTaskWrapper(t);
+      slw->updateTransit(pose, out_pose);
+      pose = out_pose;
+      has_survey_lines = true;
     }
+
+  if(has_survey_lines)
     return;
-  }
 
   geometry_msgs::PoseStamped in_pose;
   if(task_->getFirstPose(in_pose))
   {
     if(length(vectorBetween(from_pose.pose, in_pose.pose))>10.0)
-      task_->updateTransitTo(in_pose);
+      task_->updateTransitTo(from_pose, in_pose);
   }
   else 
     in_pose = from_pose;
@@ -69,27 +39,20 @@ void SurveyAreaTask::updateTransit(const geometry_msgs::PoseStamped& from_pose, 
 
 std::shared_ptr<Task> SurveyAreaTask::getCurrentNavigationTask()
 {
-  auto transit_to = task_->getFirstChildOfTypeAndID("transit","transit_to");
-  if(transit_to && !transit_to->done())
-    return transit_to;
-
-  auto next_task = task_->getFirstUndoneChildTask();
-  while(next_task)
+  for(auto t: task_->children().tasksByPriority(true))
   {
-    auto tw = context_->getTaskWrapper(next_task);
-    if(tw)
+    if(t->message().type == "transit")
+      return t;
+    if(t->message().type == "survey_line")
     {
-      auto nav_task = tw->getCurrentNavigationTask();
-      if(nav_task)
-        return nav_task;
+      auto slw = context_->getTaskWrapper(t);
+      return slw->getCurrentNavigationTask();
     }
-    auto status = next_task->status();
+    auto status = t->status();
     status["skipped"] = "Skipped by SurveyAreaTask";
-    next_task->setStatus(status);
-    next_task->setDone();
-    next_task = task_->getFirstUndoneChildTask();
+    t->setStatus(status);
+    t->setDone();
   }
-
   return task_;
 }
 
@@ -98,5 +61,14 @@ void SurveyAreaTask::configure(std::string name, std::shared_ptr<Context> contex
   
 }
 
+void SurveyAreaTask::getPreviewDisplay(visualization_msgs::MarkerArray& marker_array)
+{
+  for(auto t: task_->children().tasksByPriority(true))
+  {
+    auto tw = context_->getTaskWrapper(t);
+    if(tw)
+      tw->getPreviewDisplay(marker_array);
+  }
+}
 
 } // namespace project11_navigation

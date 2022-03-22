@@ -17,9 +17,7 @@ public:
   const std::vector<std::shared_ptr<Task> >& tasks() const;
   std::vector<project11_nav_msgs::Task> taskMessages() const;
 
-  std::shared_ptr<Task> getFirstTask() const;
-  std::shared_ptr<Task> getFirstUndoneTask() const;
-  std::shared_ptr<Task> getNextTask(std::shared_ptr<Task> task) const;
+  std::vector<std::shared_ptr<Task> > tasksByPriority(bool skip_done = false) const;
 
   bool getFirstPose(geometry_msgs::PoseStamped& pose, bool recursive= false) const;
   bool getLastPose(geometry_msgs::PoseStamped& pose, bool recursive= false) const;
@@ -30,10 +28,6 @@ public:
 
   std::string generateUniqueID(const std::string &prefix, std::shared_ptr<Task> skip = std::shared_ptr<Task>()) const;
 
-  std::shared_ptr<Task> getFirstTaskOfType(std::string type) const;
-  std::shared_ptr<Task> getNextTaskOfType(std::shared_ptr<Task> task) const;
-  std::shared_ptr<Task> getLastTaskOfType(std::string type) const;
-  std::shared_ptr<Task> getFirstTaskOfTypeAndID(std::string type, std::string id) const;
 private:
   /// Split the id of a potential child task into the path and direct child part.
   /// Returns empty strings if the id is not for a child task.

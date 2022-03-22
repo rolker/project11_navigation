@@ -18,11 +18,12 @@ public:
   const project11_nav_msgs::Task& message() const;
   bool done(bool recursive=false) const;
 
-  bool hasChildren() const;
+  const TaskList& children() const;
 
   void setDone();
   void setChildID(std::shared_ptr<Task> task, std::string id);
   void setID(std::string id);
+  std::string getChildID(std::string id) const;
 
 
   YAML::Node data() const;
@@ -33,22 +34,12 @@ public:
 
   ros::Time lastUpdateTime() const;
 
-  std::vector<project11_nav_msgs::Task> childrenTaskMessages() const;
-
   bool getFirstPose(geometry_msgs::PoseStamped& pose, bool recursive = false) const;
   bool getLastPose(geometry_msgs::PoseStamped& pose, bool recursive = false) const;
 
-  std::shared_ptr<Task> getFirstChildTask() const;
-  std::shared_ptr<Task> getFirstUndoneChildTask() const;
-  std::shared_ptr<Task> getFirstChildOfType(std::string type) const;
-  std::shared_ptr<Task> getNextChildOfType(std::shared_ptr<Task> task) const;
-  std::shared_ptr<Task> getLastChildOfType(std::string type) const;
-  std::shared_ptr<Task> getFirstChildOfTypeAndID(std::string type, std::string id) const;
-  std::shared_ptr<Task> getFirstChildOfTypeAndIDOrCreate(std::string type, std::string id);
-
   std::shared_ptr<Task> createChildTaskBefore(std::shared_ptr<Task> task = std::shared_ptr<Task>(), std::string type = "");
 
-  void updateTransitTo(const geometry_msgs::PoseStamped& from_pose);
+  std::shared_ptr<Task> updateTransitTo(const geometry_msgs::PoseStamped& from_pose, const geometry_msgs::PoseStamped& in_pose);
 
 private:
   project11_nav_msgs::Task message_;
