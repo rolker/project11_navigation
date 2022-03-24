@@ -62,7 +62,7 @@ void Navigator::iterate(const ros::TimerEvent& event)
 
   if(task_manager_->running())
   {
-    ROS_INFO_STREAM_THROTTLE(1.0, "Task manager is running");
+    //ROS_INFO_STREAM_THROTTLE(1.0, "Task manager is running");
     geometry_msgs::TwistStamped cmd_vel;
     cmd_vel.header.stamp = ros::Time::now();
     cmd_vel.header.frame_id = robot_->baseFrame();
@@ -76,7 +76,7 @@ void Navigator::iterate(const ros::TimerEvent& event)
   }
   else
   {
-    ROS_INFO_STREAM_THROTTLE(1.0, "Task manager is NOT running");
+    //ROS_INFO_STREAM_THROTTLE(1.0, "Task manager is NOT running");
     done();
   }
 }
