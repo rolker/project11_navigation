@@ -12,6 +12,9 @@ Robot::Robot(Context::Ptr context)
 
   enable_sub_ = nh.subscribe<std_msgs::Bool>("enable", 10, &Robot::enableCallback, this);
 
+  if(nh.hasParam("turn_radius"))
+    nh.getParam("turn_radius", capabilities_.turn_radius_map[0.0]);
+
   readLinearAngularParameters(nh, "robot/max_velocity", capabilities_.max_velocity, capabilities_.max_velocity);
   readLinearAngularParameters(nh, "robot/min_velocity", capabilities_.min_velocity, capabilities_.min_velocity);
   readLinearAngularParameters(nh, "robot/default_velocity", capabilities_.default_velocity, capabilities_.default_velocity);
