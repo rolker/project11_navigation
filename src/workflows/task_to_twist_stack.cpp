@@ -17,11 +17,13 @@ void TaskToTwistStack::configure(std::string name, Context::Ptr context)
     last_step_ = context->pluginsLoader()->getPlugin<TaskToTwistWorkflow>(last_step);
   if(!last_step_)
     ROS_WARN_STREAM("Unable to get last step plugin: " << last_step);
+  ROS_INFO_STREAM("Stack "<<name<<", last step: "<< last_step);
   
   std::vector<std::string> steps;
   nh.getParam("steps", steps);
   for(auto step: steps)
   {
+    ROS_INFO_STREAM("step: "<< step);
     auto sp = context_->pluginsLoader()->getPlugin<TaskToTaskWorkflow>(step);
     if(sp)
       steps_.push_back(sp);
