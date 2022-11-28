@@ -12,36 +12,55 @@ namespace project11_navigation
 void GotoTask::updateTransit(const geometry_msgs::PoseStamped& from_pose, geometry_msgs::PoseStamped& out_pose)
 {
   auto current_pose = from_pose;
-  for(int i = 0; i < task_->message().poses.size(); i++)
+  if(task_->getFirstPose(current_pose))
   {
-    auto next_pose = task_->message().poses[i];
-    std::string task_id = "transit_to_wp"+std::to_string(i);
-    std::shared_ptr<Task> transit;
-    for(auto t: task_->children().tasks())
-      if(t->message().type == "transit" && t->message().id == task_->getChildID(task_id))
+    if(length(vectorBetween(from_pose.pose, current_pose.pose))>10.0)
+    {
+      auto transit = task_->updateTransitTo(from_pose, current_pose);
+      auto preview_planner = context_->pluginsLoader()->getPlugin<TaskToTaskWorkflow>("preview");
+      if(preview_planner)
       {
-        transit = t;
-        break;
+        preview_planner->setGoal(transit);
+        std::shared_ptr<Task> plan;
+        preview_planner->getResult(plan);
       }
-    if(!transit)
-    {
-      transit = task_->createChildTaskBefore(std::shared_ptr<Task>(), "transit");
-      task_->setChildID(transit, task_id);
     }
-    auto m = transit->message();
-    m.poses.clear();
-    m.poses.push_back(current_pose);
-    m.poses.push_back(next_pose);
-    transit->update(m);
-    auto preview_planner = context_->pluginsLoader()->getPlugin<TaskToTaskWorkflow>("preview");
-    if(preview_planner)
-    {
-      preview_planner->setGoal(transit);
-      std::shared_ptr<Task> plan;
-      preview_planner->getResult(plan);
-    }
-    current_pose = next_pose;
+    else
+      task_->clearTransitTo();
   }
+  else
+    current_pose = from_pose;
+
+  // for(int i = 0; i < task_->message().poses.size(); i++)
+  // {
+  //   auto next_pose = task_->message().poses[i];
+  //   std::string task_id = "transit_to_wp"+std::to_string(i);
+  //   std::shared_ptr<Task> transit;
+  //   for(auto t: task_->children().tasks())
+  //     if(t->message().type == "transit" && t->message().id == task_->getChildID(task_id))
+  //     {
+  //       transit = t;
+  //       break;
+  //     }
+  //   if(!transit)
+  //   {
+  //     transit = task_->createChildTaskBefore(std::shared_ptr<Task>(), "transit");
+  //     task_->setChildID(transit, task_id);
+  //   }
+  //   auto m = transit->message();
+  //   m.poses.clear();
+  //   m.poses.push_back(current_pose);
+  //   m.poses.push_back(next_pose);
+  //   transit->update(m);
+  //   auto preview_planner = context_->pluginsLoader()->getPlugin<TaskToTaskWorkflow>("preview");
+  //   if(preview_planner)
+  //   {
+  //     preview_planner->setGoal(transit);
+  //     std::shared_ptr<Task> plan;
+  //     preview_planner->getResult(plan);
+  //   }
+  //   current_pose = next_pose;
+  // }
   out_pose = current_pose;
 }
 

@@ -6,6 +6,9 @@ plugins:
   TaskToTaskWorkflow:
     dubins: dubins_curves/Dubins
     preview: dubins_curves/Dubins
+    navcoreplanner: project11_navigation/NavCorePlanner
+    alexplanner: alex_path_planner/AlexPathPlanner
+    dubins_planner: dubins_planner/DubinsPlanner
   TaskToTwistWorkflow:
     executive: project11_navigation/ExecuteTask
     transit: project11_navigation/TaskToTwistStack
@@ -36,7 +39,7 @@ TaskToTwistWorkflow/path_follower:
 
 TaskToTwistWorkflow/transit:
   steps:
-    - dubins
+    - dubins_planner
   last_step: path_follower
 
 TaskToTwistWorkflow/survey_line:
@@ -44,3 +47,7 @@ TaskToTwistWorkflow/survey_line:
 
 TaskToTaskWorkflow/preview:
   output_task_name: preview_trajectory
+
+TaskToTaskWorkflow/alexplanner:
+  time_horizon: 300.0
+  planning_time: 5.0

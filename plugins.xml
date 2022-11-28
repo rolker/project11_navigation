@@ -66,4 +66,11 @@
     <description>Project11 Navigation plugin that chains a series of handlers that process a task in series.</description>
   </class>
 
+  <class base_class_type="project11_navigation::TaskToTaskWorkflow"
+      type="project11_navigation::NavCorePlanner"
+      name="project11_navigation/NavCorePlanner">
+    <description>Project11 Navigation plugin that loads a NavCore global planner.</description>
+  </class>
+
+
 </library>

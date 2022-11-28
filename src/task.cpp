@@ -1,4 +1,5 @@
 #include "project11_navigation/task.h"
+#include <project11_navigation/utilities.h>
 #include <ros/ros.h>
 
 namespace project11_navigation
@@ -151,11 +152,30 @@ std::shared_ptr<Task> Task::updateTransitTo(const geometry_msgs::PoseStamped& fr
     setChildID(transit, "transit_to");
   }
   auto m = transit->message();
+  if(m.poses.size() == 2)
+  {
+    if(length(vectorBetween(from_pose.pose, m.poses[0].pose))<1.0 && length(vectorBetween(in_pose.pose, m.poses[1].pose))<1.0)
+      return transit;
+  }
   m.poses.clear();
   m.poses.push_back(from_pose);
   m.poses.push_back(in_pose);
   transit->update(m);
   return transit;
+}
+
+void Task::clearTransitTo()
+{
+  for(auto t: children_.tasks())
+  {
+    if (t->message().type == "transit" && t->message().id == getChildID("transit_to"))
+    {
+      auto m = t->message();
+      m.poses.clear();
+      t->update(m);
+      break;
+    }
+  }
 }
 
 }  // namespace project11_navigation

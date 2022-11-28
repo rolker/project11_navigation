@@ -47,10 +47,11 @@ void TaskToTwistStack::setGoal(const std::shared_ptr<Task>& input)
 bool TaskToTwistStack::running()
 {
   iterate();
+  bool ret = false; // don't short circuit so all the steps' running() are called.
   for(auto step: steps_)
-    if(step->running())
-      return true;
-  return last_step_->running();
+    ret |= step->running();
+  ret |= last_step_->running();
+  return ret;
 }
 
 bool TaskToTwistStack::getResult(geometry_msgs::TwistStamped& output)
@@ -61,6 +62,8 @@ bool TaskToTwistStack::getResult(geometry_msgs::TwistStamped& output)
 
 void TaskToTwistStack::iterate()
 {
+  if(!current_task_)
+    return;
   for(int i = 0; i < steps_.size(); i++)
   {
     if(steps_[i]->getResult(sub_tasks_[i]))
@@ -74,6 +77,7 @@ void TaskToTwistStack::iterate()
       else
         sub_tasks_[i-1]->setDone();
   }
+
 }
 
 } // namespace project11_navigation

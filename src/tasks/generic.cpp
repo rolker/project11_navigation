@@ -25,6 +25,8 @@ void GenericTask::updateTransit(const geometry_msgs::PoseStamped& from_pose, geo
         preview_planner->getResult(plan);
       }
     }
+    else
+      task_->clearTransitTo();
   }
   else 
     in_pose = from_pose;

@@ -21,11 +21,13 @@ void TaskConnector::setGoal(const std::shared_ptr<TaskList>& input)
 
 bool TaskConnector::running()
 {
-  return false;
+  return true;
+  //return false;
 }
 
 bool TaskConnector::getResult(std::shared_ptr<TaskList>& output)
 {
+  connected_ = connectTasks();
   if(connected_)
     output = task_list_;
   return connected_;

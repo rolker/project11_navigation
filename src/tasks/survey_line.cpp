@@ -24,6 +24,8 @@ void SurveyLineTask::updateTransit(const geometry_msgs::PoseStamped& from_pose, 
 
     if(length(vectorBetween(from_pose.pose, in_pose.pose))>10.0)
       task_->updateTransitTo(from_pose, in_pose);
+    else
+      task_->clearTransitTo();
   }
   else
   {

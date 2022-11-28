@@ -75,6 +75,7 @@ set(PLUGIN_SOURCES
   src/tasks/transit.cpp
   src/workflows/execute_task.cpp
   src/workflows/nav_core.cpp
+  src/workflows/nav_core_planner.cpp
   src/workflows/task_connector.cpp
   src/workflows/task_manager.cpp
   src/workflows/task_to_twist_stack.cpp

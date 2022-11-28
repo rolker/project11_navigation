@@ -25,6 +25,8 @@ void HoverTask::updateTransit(const geometry_msgs::PoseStamped& from_pose, geome
         preview_planner->getResult(plan);
       }
     }
+    else
+      task_->clearTransitTo();
   }
   else
     in_pose = from_pose;

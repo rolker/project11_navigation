@@ -41,6 +41,8 @@ public:
 
   std::shared_ptr<Task> updateTransitTo(const geometry_msgs::PoseStamped& from_pose, const geometry_msgs::PoseStamped& in_pose);
 
+  void clearTransitTo();
+
 private:
   project11_nav_msgs::Task message_;
   TaskList children_;

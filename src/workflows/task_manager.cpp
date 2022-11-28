@@ -47,6 +47,7 @@ bool TaskManager::running()
 
 bool TaskManager::getResult(geometry_msgs::TwistStamped& output)
 {
+  task_connector_->getResult(task_list_);
   updateCurrentTask();
   return executive_->getResult(output);
 }
