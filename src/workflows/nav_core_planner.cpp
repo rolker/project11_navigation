@@ -84,7 +84,7 @@ void NavCorePlanner::updatePlan()
           }
           catch(const std::exception& e)
           {
-            std::cerr << e.what() << '\n';
+            ROS_WARN_STREAM(e.what());
             return;
           }
         }
@@ -97,7 +97,7 @@ void NavCorePlanner::updatePlan()
           }
           catch(const std::exception& e)
           {
-            std::cerr << e.what() << '\n';
+            ROS_WARN_STREAM(e.what());
             return;
           }
         }
