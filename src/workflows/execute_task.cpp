@@ -83,7 +83,11 @@ bool ExecuteTask::updateCurrentHandler()
           else
             current_handler_ = context_->pluginsLoader()->getPlugin<TaskToTwistWorkflow>(task_type);
           if(current_handler_)
+          {
+            if(old_handler && old_handler != current_handler_)
+              old_handler->setGoal(std::shared_ptr<Task>());
             current_handler_->setGoal(current_nav_task_);
+          }
           else
           {
             auto status = current_nav_task_->status();
@@ -110,8 +114,6 @@ bool ExecuteTask::updateCurrentHandler()
   }
   else
     current_handler_.reset();
-  if(old_handler && old_handler != current_handler_)
-    old_handler->setGoal(std::shared_ptr<Task>());
   return current_handler_ && current_handler_->running();
 }
 
