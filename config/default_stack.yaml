@@ -51,3 +51,17 @@ TaskToTaskWorkflow/preview:
 TaskToTaskWorkflow/alexplanner:
   time_horizon: 300.0
   planning_time: 5.0
+
+costmap:
+    plugins: 
+    - {name: chart,            type: "s57_layer::S57Layer"}
+    publish_frequency: 0.5
+    update_frequency: 0.5
+    rolling_window: true
+    width: 10000
+    height: 10000
+    resolution: 3
+    always_send_full_costmap: true
+
+    chart:
+      update_timeout: 1.0
