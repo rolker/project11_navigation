@@ -15,14 +15,14 @@ void SurveyLineTask::updateTransit(const geometry_msgs::PoseStamped& from_pose, 
     auto first_segment_direction_vector = normalize(vectorBetween(task_->message().poses[0].pose, task_->message().poses[1].pose));
 
     // TODO: get this from a parameter
-    double lead_in_distance = 25.0;
+    double lead_in_distance = 2.0;
 
     geometry_msgs::PoseStamped in_pose = task_->message().poses[0];
     in_pose.pose.position.x -= first_segment_direction_vector.x*lead_in_distance;
     in_pose.pose.position.y -= first_segment_direction_vector.y*lead_in_distance;
     in_pose.pose.position.z -= first_segment_direction_vector.z*lead_in_distance;
 
-    if(length(vectorBetween(from_pose.pose, in_pose.pose))>10.0)
+    if(length(vectorBetween(from_pose.pose, in_pose.pose))>1.0)
       task_->updateTransitTo(from_pose, in_pose);
     else
       task_->clearTransitTo();
@@ -32,7 +32,7 @@ void SurveyLineTask::updateTransit(const geometry_msgs::PoseStamped& from_pose, 
     geometry_msgs::PoseStamped in_pose;
     if(task_->getFirstPose(in_pose))
     {
-      if(length(vectorBetween(from_pose.pose, in_pose.pose))>10.0)
+      if(length(vectorBetween(from_pose.pose, in_pose.pose))>1.0)
         task_->updateTransitTo(from_pose, in_pose);
     }
     else 
