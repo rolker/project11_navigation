@@ -27,10 +27,6 @@ plugins:
     survey_line: project11_navigation/SurveyLineTask
     transit: project11_navigation/TransitTask
 
-TaskToTwistWorkflow/executive:
-  handlers:
-    foo: bar
-
 TaskToTwistWorkflow/path_follower:
   pid:
     upper_limit: 90
