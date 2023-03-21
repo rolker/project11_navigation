@@ -77,6 +77,7 @@ private:
     std::map<std::string, boost::shared_ptr<T> > plugins;
     void load(std::string name, std::string type)
     {
+      ROS_INFO_STREAM("Loading " << name << " plugin of type " << type << "...");
       try
       {
         plugins[name] =  loader.createInstance(type);
