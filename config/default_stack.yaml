@@ -7,7 +7,6 @@ plugins:
     dubins: dubins_curves/Dubins
     preview: dubins_curves/Dubins
     navcoreplanner: project11_navigation/NavCorePlanner
-    alexplanner: alex_path_planner/AlexPathPlanner
     dubins_planner: dubins_planner/DubinsPlanner
   TaskToTwistWorkflow:
     executive: project11_navigation/ExecuteTask
@@ -35,7 +34,7 @@ TaskToTwistWorkflow/path_follower:
 
 TaskToTwistWorkflow/transit:
   steps:
-    - dubins_planner
+    - dubins
   last_step: path_follower
 
 TaskToTwistWorkflow/survey_line:
@@ -44,19 +43,15 @@ TaskToTwistWorkflow/survey_line:
 TaskToTaskWorkflow/preview:
   output_task_name: preview_trajectory
 
-TaskToTaskWorkflow/alexplanner:
-  time_horizon: 300.0
-  planning_time: 5.0
-
 costmap:
     plugins: 
     - {name: chart,            type: "s57_layer::S57Layer"}
     publish_frequency: 0.5
     update_frequency: 0.5
     rolling_window: true
-    width: 10000
-    height: 10000
-    resolution: 3
+    width: 5000
+    height: 5000
+    resolution: 2
     always_send_full_costmap: true
 
     chart:
