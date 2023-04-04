@@ -71,11 +71,11 @@ void TaskManager::updateCurrentTask()
   if(old_task != current_task_)
   {
     if(old_task)
-      ROS_INFO_STREAM("old task:\n" << old_task->message());
+      ROS_INFO_STREAM("old task:\n" << old_task->message().id);
     else
       ROS_INFO_STREAM("old task: none");
     if(current_task_)
-      ROS_INFO_STREAM("new task:\n" << current_task_->message());
+      ROS_INFO_STREAM("new task:\n" << current_task_->message().id);
     else
       ROS_INFO_STREAM("new task: none");
   }
