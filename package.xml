@@ -13,6 +13,7 @@
   <depend>actionlib_msgs</depend>
   <depend>costmap_2d</depend>
   <depend>geometry_msgs</depend>
+  <depend>grid_map_ros</depend>
   <depend>nav_core</depend>
   <depend>pluginlib</depend>
   <depend>project11_nav_msgs</depend>

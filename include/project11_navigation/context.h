@@ -6,15 +6,16 @@
 #include <tf2_ros/transform_listener.h>
 #include <costmap_2d/costmap_2d_ros.h>
 #include <project11_navigation/robot_capabilities.h>
+#include <project11_navigation/environment.h>
 #include <mutex>
 
 namespace project11_navigation
 {
+
 class PluginsLoader;
 class Robot;
 class Task;
 class TaskWrapper;
-
 
 // Assembles the relevant data for accomplishing navigation tasks.
 class Context
@@ -27,6 +28,9 @@ public:
 
   RobotCapabilities getRobotCapabilities();
   nav_msgs::Odometry getOdometry();
+
+  Environment& environment();
+
   bool getOutputEnabled();
   tf2_ros::Buffer& tfBuffer();
   geometry_msgs::PoseStamped getPoseInFrame(std::string frame_id);
@@ -45,6 +49,8 @@ private:
 
   RobotCapabilities robot_capabilities_;
   std::mutex robot_capabilities_mutex_;
+
+  Environment environment_;
 
   nav_msgs::Odometry odom_;
   std::mutex odom_mutex_;

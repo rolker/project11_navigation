@@ -32,6 +32,11 @@ nav_msgs::Odometry Context::getOdometry()
   return odom_;
 }
 
+Environment& Context::environment()
+{
+  return environment_;
+}
+
 bool Context::getOutputEnabled()
 {
   std::lock_guard<std::mutex> lock(output_enabled_mutex_);
