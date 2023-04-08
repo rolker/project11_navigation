@@ -23,6 +23,7 @@ private:
   struct Grid
   {
     void gridCallback(const grid_map_msgs::GridMap::ConstPtr &data);
+    void subscribe(std::string topic);
 
     grid_map::GridMap grid_map;
     std::mutex grid_map_mutex;
