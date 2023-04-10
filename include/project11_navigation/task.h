@@ -3,6 +3,7 @@
 
 #include <project11_navigation/tasklist.h>
 #include <yaml-cpp/yaml.h>
+#include <visualization_msgs/MarkerArray.h>
 
 namespace project11_navigation
 {
@@ -43,10 +44,13 @@ public:
 
   void clearTransitTo();
 
+  visualization_msgs::MarkerArray& markerArray();
 private:
   project11_nav_msgs::Task message_;
   TaskList children_;
   ros::Time last_update_time_;
+
+  visualization_msgs::MarkerArray marker_array_;
 };
 
 } // namespace project11_navigation

@@ -178,4 +178,9 @@ void Task::clearTransitTo()
   }
 }
 
+visualization_msgs::MarkerArray& Task::markerArray()
+{
+  return marker_array_;
+}
+
 }  // namespace project11_navigation

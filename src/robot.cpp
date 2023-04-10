@@ -29,6 +29,37 @@ Robot::Robot(Context::Ptr context)
   readLinearAngularParameters(nh, "robot/max_acceleration", capabilities_.max_acceleration, capabilities_.max_acceleration);
   readLinearAngularParameters(nh, "robot/max_deceleration", capabilities_.max_deceleration, capabilities_.max_deceleration);
 
+  if(nh.getParam("robot/footprint", value))
+  {
+    if(value.getType() == XmlRpc::XmlRpcValue::TypeArray)
+    {
+      for(int i = 0; i < value.size(); ++i)
+      {
+        if(value[i].getType() == XmlRpc::XmlRpcValue::TypeArray && value[i].size() == 2)
+        {
+          geometry_msgs::Point p;
+          if(value[i][0].getType() == XmlRpc::XmlRpcValue::TypeDouble)
+            p.x = static_cast<double>(value[i][0]);
+          else
+            p.x = static_cast<int>(value[i][0]);
+          if(value[i][1].getType() == XmlRpc::XmlRpcValue::TypeDouble)
+            p.y = static_cast<double>(value[i][1]);
+          else
+            p.y = static_cast<int>(value[i][1]);
+          capabilities_.footprint.push_back(p);
+        }
+        else
+          ROS_ERROR_STREAM("Expected an array of 2 values in footprint point number " << i);
+      }
+    }
+    else
+      ROS_ERROR_STREAM("Expected an array of points for the footprint");
+    for(auto p: capabilities_.footprint)
+      capabilities_.radius = std::max(capabilities_.radius, sqrt(p.x*p.x + p.y*p.y));
+  }
+
+  capabilities_.radius = readDoubleOrIntParameter(nh, "robot/radius", capabilities_.radius);
+
   context_->updateRobotCapabilities(capabilities_);
 }
 

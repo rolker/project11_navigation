@@ -3,6 +3,7 @@
 
 #include <geometry_msgs/Accel.h>
 #include <geometry_msgs/Twist.h>
+#include <geometry_msgs/Point.h>
 
 namespace project11_navigation
 {
@@ -23,6 +24,13 @@ struct RobotCapabilities
   /// Speeds at which the robot can't run can be indicated with a NaN.
   std::map<double, double> turn_radius_map;
   double getTurnRadiusAtSpeed(double speed) const;
+
+  // Outline in XY plane of the robot
+  std::vector<geometry_msgs::Point> footprint;
+
+  // Radius used for collison checking
+  double radius;
+
 };
 
 }

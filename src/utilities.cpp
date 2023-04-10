@@ -55,4 +55,20 @@ geometry_msgs::Vector3 normalize(const geometry_msgs::Vector3& vector)
   return ret;
 }
 
+double readDoubleOrIntParameter(ros::NodeHandle &nh, const std::string& parameter, double default_value)
+{
+  XmlRpc::XmlRpcValue value;
+  if(nh.getParam(parameter, value))
+  {
+    if(value.getType() == XmlRpc::XmlRpcValue::TypeDouble)
+      return static_cast<double>(value);
+    if(value.getType() == XmlRpc::XmlRpcValue::TypeInt)
+      return static_cast<int>(value);
+    ROS_FATAL_STREAM("Expected number for parameter " << parameter << " but got " << std::string(value));
+    throw std::runtime_error("Could not read number from parameter");
+  }
+  return default_value;
+}
+
+
 } // namespace project11_navigation

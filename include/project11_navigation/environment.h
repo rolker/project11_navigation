@@ -16,8 +16,21 @@ public:
 
   Environment();
 
-  std::map<std::string, grid_map::GridMap> getStaticGrids();
+  // Contains copies of grid maps for use where the maps shouldn't change
+  // such as planners that expect a static map
+  struct Snapshot
+  {
+    std::map<std::string, grid_map::GridMap> static_grids;
+    std::map<double, std::vector<std::string> > static_grids_by_resolution;
 
+    std::map<std::string, grid_map::GridMap> dynamic_grids;
+  };
+
+  // Generates and returns a snapshot.
+  Snapshot snapshot(bool dynamic_only=false);
+
+  std::string mapFrame();
+  
 private:
 
   struct Grid

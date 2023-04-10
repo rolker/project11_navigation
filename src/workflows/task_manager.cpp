@@ -15,7 +15,7 @@ void TaskManager::configure(std::string name, Context::Ptr context)
   task_connector_ = context_->pluginsLoader()->getPlugin<TaskListToTaskListWorkflow>("task_connector");
   executive_ = context_->pluginsLoader()->getPlugin<TaskToTwistWorkflow>("executive");
   ros::NodeHandle nh("~/"+name);
-  display_interval_ = ros::Duration(nh.param("display_interval", 1.0));
+  display_interval_ = ros::Duration(nh.param("display_interval", 0.1));
   ros::NodeHandle top_nh("~");
   display_pub_ = top_nh.advertise<visualization_msgs::MarkerArray>("visualization_markers", 10);
 }

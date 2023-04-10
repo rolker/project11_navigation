@@ -17,17 +17,41 @@ Environment::Environment()
   }
 }
 
-std::map<std::string, grid_map::GridMap> Environment::getStaticGrids()
+Environment::Snapshot Environment::snapshot(bool dynamic_only)
 {
-  std::map<std::string, grid_map::GridMap> ret;
-  for(auto& g: static_grids_)
+  Snapshot ret;
+  if(!dynamic_only)
+  {
+    for(auto& g: static_grids_)
+    {
+      std::lock_guard<std::mutex> lock(g.second.grid_map_mutex);
+      ret.static_grids[g.first] = g.second.grid_map;
+    }
+    for(auto& sg: ret.static_grids)
+      ret.static_grids_by_resolution[sg.second.getResolution()].push_back(sg.first);
+  }
+  for(auto& g: dynamic_grids_)
   {
     std::lock_guard<std::mutex> lock(g.second.grid_map_mutex);
-    ret[g.first] = g.second.grid_map;
+    ret.dynamic_grids[g.first] = g.second.grid_map;
   }
   return ret;
 }
 
+std::string Environment::mapFrame()
+{
+  if(!static_grids_.empty())
+  {
+    std::lock_guard<std::mutex> lock(static_grids_.begin()->second.grid_map_mutex);
+    return static_grids_.begin()->second.grid_map.getFrameId();
+  }
+  if(!dynamic_grids_.empty())
+  {
+    std::lock_guard<std::mutex> lock(dynamic_grids_.begin()->second.grid_map_mutex);
+    return dynamic_grids_.begin()->second.grid_map.getFrameId();
+  }
+  return "";
+}
 
 void Environment::Grid::subscribe(std::string topic)
 {

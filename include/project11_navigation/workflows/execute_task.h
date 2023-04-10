@@ -36,6 +36,8 @@ private:
   std::shared_ptr<Task> current_task_;
   std::shared_ptr<Task> current_nav_task_;
   boost::shared_ptr<TaskToTwistWorkflow> current_handler_;
+
+  ros::Publisher display_pub_;
 };
 
 }  // namespace project11_navigation
