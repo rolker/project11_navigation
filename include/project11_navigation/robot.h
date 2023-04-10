@@ -6,7 +6,7 @@
 #include <geometry_msgs/TwistStamped.h>
 #include <project11_navigation/robot_capabilities.h>
 #include <project11_navigation/context.h>
-
+#include <visualization_msgs/MarkerArray.h>
 
 namespace project11_navigation
 {
@@ -18,6 +18,9 @@ public:
   Robot(Context::Ptr context);
 
   void sendControls(const geometry_msgs::TwistStamped& cmd_vel);
+
+  void updateMarkers(visualization_msgs::MarkerArray& marker_array);
+
 
 protected:
   void odometryUpdated() override;

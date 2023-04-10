@@ -36,6 +36,8 @@ private:
 
   // Task list as provided by the user
   std::vector<project11_nav_msgs::Task> task_messages_;
+
+  ros::Publisher display_pub_;
 };
 
 } // namespace project11_navigation

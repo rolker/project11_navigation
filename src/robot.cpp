@@ -79,4 +79,27 @@ void Robot::odometryUpdated()
   context_->updateOdometry(odom_);
 }
 
+void Robot::updateMarkers(visualization_msgs::MarkerArray& marker_array)
+{
+  visualization_msgs::Marker marker;
+  marker.header.frame_id = odom_.header.frame_id;
+  marker.header.stamp = odom_.header.stamp;
+  marker.id = 0;
+  marker.ns = odom_.header.frame_id;
+  marker.action = visualization_msgs::Marker::ADD;
+  marker.type = visualization_msgs::Marker::LINE_STRIP;
+  marker.pose = odom_.pose.pose;
+  marker.color.r = .75;
+  marker.color.g = .75;
+  marker.color.b = .25;
+  marker.color.a = .75;
+  marker.scale.x = 0.1;
+  for(auto p: capabilities_.footprint)
+  {
+    marker.points.push_back(p);
+  }
+  marker_array.markers.push_back(marker);
+
+}
+
 } // namespace project11_navigation

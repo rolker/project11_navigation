@@ -33,6 +33,9 @@ Navigator::Navigator()
   if(!task_manager_)
     ROS_FATAL_STREAM("Unable to load toplevel task manager plugin: " << task_manager_plugin);
 
+  display_pub_ = ros::NodeHandle("~").advertise<visualization_msgs::MarkerArray>("visualization_markers", 10);
+
+
   iterate_timer_ = nodeHandle_.createTimer(ros::Duration(controller_period), &Navigator::iterate, this);
 }
 
@@ -59,6 +62,10 @@ void Navigator::updateTasks(const std::vector<project11_nav_msgs::Task>& tasks)
 void Navigator::iterate(const ros::TimerEvent& event)
 {
   ROS_DEBUG_STREAM("last expected: " << event.last_expected << " last real: " << event.last_real << " current_expected: " << event.current_expected << " current real: " << event.current_real << " last duration: " << event.profile.last_duration);
+
+  visualization_msgs::MarkerArray array;
+  robot_->updateMarkers(array);
+  display_pub_.publish(array);
 
   if(task_manager_->running())
   {

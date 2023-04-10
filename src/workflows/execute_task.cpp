@@ -73,11 +73,6 @@ bool ExecuteTask::updateCurrentHandler()
     {
       auto old_nav_task = current_nav_task_;
       current_nav_task_ = tw->getCurrentNavigationTask();
-      visualization_msgs::MarkerArray marker_array;
-      if(current_nav_task_)
-        for(auto m: current_nav_task_->markerArray().markers)
-          marker_array.markers.push_back(m);
-      display_pub_.publish(marker_array);
       if(current_nav_task_)
       {
         if(current_nav_task_ != old_nav_task)
@@ -120,6 +115,13 @@ bool ExecuteTask::updateCurrentHandler()
   }
   else
     current_handler_.reset();
+
+  visualization_msgs::MarkerArray marker_array;
+  if(current_nav_task_)
+    for(auto m: current_nav_task_->markerArray().markers)
+      marker_array.markers.push_back(m);
+  display_pub_.publish(marker_array);
+
   return current_handler_ && current_handler_->running();
 }
 
