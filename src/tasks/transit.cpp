@@ -43,6 +43,7 @@ void TransitTask::getPreviewDisplay(visualization_msgs::MarkerArray& marker_arra
     marker.header.frame_id = poses.front().header.frame_id;
     marker.header.stamp = ros::Time::now();
     marker.id = marker_array.markers.size();
+    marker.ns = "transit";
     marker.action = visualization_msgs::Marker::ADD;
     marker.type = visualization_msgs::Marker::LINE_STRIP;
     marker.pose.orientation.w = 1.0;

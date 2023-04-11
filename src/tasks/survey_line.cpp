@@ -73,6 +73,7 @@ void SurveyLineTask::getPreviewDisplay(visualization_msgs::MarkerArray& marker_a
     marker.header.frame_id = pose.header.frame_id;
     marker.header.stamp = ros::Time::now();
     marker.id = marker_array.markers.size();
+    marker.ns = "survey_line";
     marker.action = visualization_msgs::Marker::ADD;
     marker.type = visualization_msgs::Marker::LINE_STRIP;
     marker.pose.orientation.w = 1.0;
