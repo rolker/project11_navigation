@@ -90,7 +90,8 @@ void TaskManager::updateCurrentTask()
       if(tw)
         tw->getPreviewDisplay(marker_array);
     }
-    display_pub_.publish(marker_array);
+    if(!marker_array.markers.empty())
+      display_pub_.publish(marker_array);
     last_display_time_ = now;
   }
 

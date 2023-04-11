@@ -65,7 +65,8 @@ void Navigator::iterate(const ros::TimerEvent& event)
 
   visualization_msgs::MarkerArray array;
   robot_->updateMarkers(array);
-  display_pub_.publish(array);
+  if(!array.markers.empty())
+    display_pub_.publish(array);
 
   if(task_manager_->running())
   {

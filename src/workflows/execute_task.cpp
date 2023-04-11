@@ -120,7 +120,8 @@ bool ExecuteTask::updateCurrentHandler()
   if(current_nav_task_)
     for(auto m: current_nav_task_->markerArray().markers)
       marker_array.markers.push_back(m);
-  display_pub_.publish(marker_array);
+  if(!marker_array.markers.empty())
+    display_pub_.publish(marker_array);
 
   return current_handler_ && current_handler_->running();
 }
