@@ -8,7 +8,7 @@
 namespace project11_navigation
 {
 
-class TaskToTwistWorkflow: public Workflow<std::shared_ptr<Task>, geometry_msgs::TwistStamped>
+class TaskToTwistWorkflow: public Workflow<boost::shared_ptr<Task>, geometry_msgs::TwistStamped>
 {
 };
 

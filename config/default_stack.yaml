@@ -1,12 +1,10 @@
 
 controller_frequency: 10.0
-default_task_wrapper: generic
 
 plugins:
   TaskToTaskWorkflow:
     dubins: dubins_curves/Dubins
     preview: dubins_curves/Dubins
-    navcoreplanner: project11_navigation/NavCorePlanner
     dubins_planner: dubins_planner/DubinsPlanner
   TaskToTwistWorkflow:
     executive: project11_navigation/ExecuteTask
@@ -18,8 +16,7 @@ plugins:
     task_connector: project11_navigation/TaskConnector
   TaskListToTwistWorkflow:
     task_manager: project11_navigation/TaskManager
-  TaskWrapper:
-    generic: project11_navigation/GenericTask
+  Tasks:
     goto: project11_navigation/GotoTask
     hover: project11_navigation/HoverTask
     survey_area: project11_navigation/SurveyAreaTask
@@ -43,16 +40,3 @@ TaskToTwistWorkflow/survey_line:
 TaskToTaskWorkflow/preview:
   output_task_name: preview_trajectory
 
-costmap:
-    plugins: 
-    - {name: chart,            type: "s57_layer::S57Layer"}
-    publish_frequency: 0.5
-    update_frequency: 0.5
-    rolling_window: true
-    width: 5000
-    height: 5000
-    resolution: 2
-    always_send_full_costmap: true
-
-    chart:
-      update_timeout: 1.0

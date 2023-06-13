@@ -19,7 +19,7 @@ public:
   ~NavCore();
 
   void configure(std::string name, Context::Ptr context) override;
-  void setGoal(const std::shared_ptr<Task>& input) override;
+  void setGoal(const boost::shared_ptr<Task>& input) override;
   bool running() override;
   bool getResult(geometry_msgs::TwistStamped& output) override;
 
@@ -43,7 +43,7 @@ private:
   std::vector<geometry_msgs::PoseStamped> current_plan_;
   std::vector<geometry_msgs::PoseStamped> new_plan_;
   
-  std::shared_ptr<Task> task_;
+  boost::shared_ptr<Task> task_;
   ros::Time task_update_time_;
   std::future<bool> plan_ready_;
 

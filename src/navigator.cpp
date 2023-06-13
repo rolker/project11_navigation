@@ -3,6 +3,7 @@
 #include <project11_navigation/robot.h>
 #include <project11_navigation/workflows/task_manager.h>
 #include <project11_navigation/plugins_loader.h>
+#include <project11_navigation/task_plugins.h>
 
 namespace project11_navigation
 {
@@ -18,14 +19,10 @@ Navigator::Navigator()
 
   context_ = Context::Ptr(new Context);
   context_->pluginsLoader()->configure(context_);
+  context_->taskPlugins()->configure(context_);
+  Task::setCreator(context_->taskPlugins());
 
   robot_ = std::shared_ptr<Robot>(new Robot(context_));
-
-  if(ros::param::has("~costmap"))
-  {
-    auto costmap = std::make_shared<costmap_2d::Costmap2DROS>("costmap", context_->tfBuffer());
-    context_->setCostmap(costmap);
-  }
 
   std::string task_manager_plugin = ros::param::param<std::string>("~task_manager_plugin", "task_manager");
   task_manager_ = context_->pluginsLoader()->getPlugin<TaskListToTwistWorkflow>(task_manager_plugin);
@@ -44,7 +41,7 @@ Navigator::~Navigator()
 
 }
 
-void Navigator::updateTasks(const std::vector<project11_nav_msgs::Task>& tasks)
+void Navigator::updateTasks(const std::vector<project11_nav_msgs::TaskInformation>& tasks)
 {
   ROS_DEBUG_STREAM("update with " << tasks.size() << " tasks");
   task_messages_ = tasks;

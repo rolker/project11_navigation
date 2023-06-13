@@ -1,31 +1,27 @@
 #include <project11_navigation/tasks/transit.h>
 #include <pluginlib/class_list_macros.h>
 
-PLUGINLIB_EXPORT_CLASS(project11_navigation::TransitTask, project11_navigation::TaskWrapper)
+PLUGINLIB_EXPORT_CLASS(project11_navigation::TransitTask, project11_navigation::Task)
 
 namespace project11_navigation
 {
 
-void TransitTask::updateTransit(const geometry_msgs::PoseStamped& from_pose, geometry_msgs::PoseStamped& out_pose)
+void TransitTask::updateTransit(const geometry_msgs::PoseStamped& from_pose, geometry_msgs::PoseStamped& out_pose, std::shared_ptr<Context> context)
 {
-  if(!task_->getLastPose(out_pose))
+  if(getLastPose(out_pose))
     out_pose = from_pose;
 }
 
-std::shared_ptr<Task> TransitTask::getCurrentNavigationTask()
+boost::shared_ptr<Task> TransitTask::getCurrentNavigationTask()
 {
-  return task_;
+  return self();
 }
 
-void TransitTask::configure(std::string name, std::shared_ptr<Context> context)
-{
-  
-}
 
-void TransitTask::getPreviewDisplay(visualization_msgs::MarkerArray& marker_array)
+void TransitTask::getDisplayMarkers(visualization_msgs::MarkerArray& marker_array) const
 {
   std::vector<geometry_msgs::PoseStamped> poses;
-  for(auto t: task_->children().tasksByPriority(true))
+  for(auto t: children().tasksByPriority(true))
   {
     if (t->message().type == "follow_trajectory")
     {
@@ -35,7 +31,7 @@ void TransitTask::getPreviewDisplay(visualization_msgs::MarkerArray& marker_arra
   }
 
   if(poses.empty())
-    poses = task_->message().poses;
+    poses = message().poses;
 
   if(!poses.empty())
   {
@@ -43,7 +39,7 @@ void TransitTask::getPreviewDisplay(visualization_msgs::MarkerArray& marker_arra
     marker.header.frame_id = poses.front().header.frame_id;
     marker.header.stamp = ros::Time::now();
     marker.id = marker_array.markers.size();
-    marker.ns = "transit";
+    marker.ns = message().id;
     marker.action = visualization_msgs::Marker::ADD;
     marker.type = visualization_msgs::Marker::LINE_STRIP;
     marker.pose.orientation.w = 1.0;

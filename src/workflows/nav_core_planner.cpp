@@ -34,7 +34,7 @@ void NavCorePlanner::configure(std::string name, Context::Ptr context)
   plan_publisher_ = nh.advertise<nav_msgs::Path>("plan", 1);
 }
 
-void NavCorePlanner::setGoal(const std::shared_ptr<Task>& input)
+void NavCorePlanner::setGoal(const boost::shared_ptr<Task>& input)
 {
   if(input)
     ROS_INFO_STREAM("task:\n" << input->message());
@@ -145,7 +145,7 @@ bool NavCorePlanner::running()
   return(task_ && !task_->message().poses.empty());// && current_plan_.empty() && !plan_ready_.valid());
 }
 
-bool NavCorePlanner::getResult(std::shared_ptr<Task>& output)
+bool NavCorePlanner::getResult(boost::shared_ptr<Task>& output)
 {
   checkForNewPlan();
   if(output_task_)
@@ -178,7 +178,7 @@ void NavCorePlanner::checkForNewPlan()
           }
         if(!output_task_)
         {
-          output_task_ = task_->createChildTaskBefore(std::shared_ptr<project11_navigation::Task>(),output_task_type_);
+          output_task_ = task_->createChildTaskBefore(project11_navigation::Task::Ptr(),output_task_type_);
           task_->setChildID(output_task_, output_task_name_);
         }
         auto out_msg = output_task_->message();

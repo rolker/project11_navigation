@@ -1,6 +1,5 @@
 #include "project11_navigation/workflows/task_connector.h"
 #include "project11_navigation/utilities.h"
-#include "project11_navigation/interfaces/task_wrapper.h"
 #include <pluginlib/class_list_macros.h>
 
 PLUGINLIB_EXPORT_CLASS(project11_navigation::TaskConnector, project11_navigation::TaskListToTaskListWorkflow)
@@ -42,12 +41,7 @@ bool TaskConnector::connectTasks()
     start_position.header = odom.header;
     start_position.pose = odom.pose.pose;
     for(auto t: task_list_->tasksByPriority())
-    {
-      auto tw = context_->getTaskWrapper(t);
-      if(tw)
-        tw->updateTransit(start_position, start_position);
-    }
-    
+      t->updateTransit(start_position, start_position, context_);
     return true;
   }
   return false;

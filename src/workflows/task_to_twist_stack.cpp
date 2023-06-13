@@ -32,11 +32,11 @@ void TaskToTwistStack::configure(std::string name, Context::Ptr context)
   }
 }
 
-void TaskToTwistStack::setGoal(const std::shared_ptr<Task>& input)
+void TaskToTwistStack::setGoal(const boost::shared_ptr<Task>& input)
 {
   if(input != current_task_)
   {
-    std::shared_ptr<Task> null_task;
+    boost::shared_ptr<Task> null_task;
     for(auto s: steps_)
       s->setGoal(null_task);
     last_step_->setGoal(null_task);

@@ -1,9 +1,8 @@
 #include <project11_navigation/context.h>
 #include "tf2_geometry_msgs/tf2_geometry_msgs.h"
-#include <project11_navigation/interfaces/task_wrapper.h>
 #include <project11_navigation/plugins_loader.h>
+#include <project11_navigation/task_plugins.h>
 
-#include <project11_navigation/tasks/generic.h>
 #include <project11_navigation/tasks/hover.h>
 #include <project11_navigation/tasks/survey_area.h>
 #include <project11_navigation/tasks/survey_line.h>
@@ -14,10 +13,9 @@ namespace project11_navigation
 
 Context::Context():
   tf_listener_(tf_buffer_),
-  plugins_loader_(new PluginsLoader())
+  plugins_loader_(new PluginsLoader()), task_plugins_(new TaskPlugins())
 {
-  default_task_wrapper_ = ros::param::param<std::string>("~default_task_wrapper", default_task_wrapper_);
-  
+ 
 }
 
 RobotCapabilities Context::getRobotCapabilities()
@@ -48,6 +46,11 @@ std::shared_ptr<PluginsLoader> Context::pluginsLoader()
   return plugins_loader_;
 }
 
+std::shared_ptr<TaskPlugins> Context::taskPlugins()
+{
+  return task_plugins_;
+}
+
 void Context::updateRobotCapabilities(const RobotCapabilities& robot_capabilities)
 {
   std::lock_guard<std::mutex> lock(robot_capabilities_mutex_);
@@ -64,18 +67,6 @@ void Context::updateOutputEnabled(bool enabled)
 {
   std::lock_guard<std::mutex> lock(output_enabled_mutex_);
   output_enabled_ = enabled;
-}
-
-std::shared_ptr<costmap_2d::Costmap2DROS> Context::costmap()
-{
-  std::lock_guard<std::mutex> lock(costmap_mutex_);
-  return costmap_;
-}
-
-void Context::setCostmap(std::shared_ptr<costmap_2d::Costmap2DROS> costmap)
-{
-  std::lock_guard<std::mutex> lock(costmap_mutex_);
-  costmap_ = costmap;
 }
 
 tf2_ros::Buffer& Context::tfBuffer()
@@ -102,23 +93,6 @@ geometry_msgs::PoseStamped Context::getPoseInFrame(std::string frame_id)
     ROS_WARN_STREAM("Context::getPoseInFrame " << ex.what());
   }
 
-  return ret;
-}
-
-boost::shared_ptr<TaskWrapper> Context::getTaskWrapper(std::shared_ptr<Task> task)
-{
-  boost::shared_ptr<TaskWrapper> ret;
-  if(task)
-  {
-    ret = plugins_loader_->getPlugin<TaskWrapper>(task->message().type);
-    if(!ret)
-      ret = plugins_loader_->getPlugin<TaskWrapper>(default_task_wrapper_);
-    if(ret)
-    {
-      ret->context_ = this;
-      ret->task_ = task;
-    }
-  }
   return ret;
 }
 

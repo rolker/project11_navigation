@@ -57,6 +57,7 @@ set(NAVIGATOR_SOURCES
   src/navigator_action.cpp
   src/plugins_loader.cpp
   src/robot.cpp
+  src/task_plugins.cpp
 )
 
 add_executable(navigator ${NAVIGATOR_SOURCES})
@@ -69,7 +70,6 @@ target_link_libraries(navigator
 )
 
 set(PLUGIN_SOURCES
-  src/tasks/generic.cpp
   src/tasks/goto.cpp
   src/tasks/hover.cpp
   src/tasks/survey_area.cpp
@@ -77,7 +77,6 @@ set(PLUGIN_SOURCES
   src/tasks/transit.cpp
   src/workflows/execute_task.cpp
   src/workflows/nav_core.cpp
-  src/workflows/nav_core_planner.cpp
   src/workflows/task_connector.cpp
   src/workflows/task_manager.cpp
   src/workflows/task_to_twist_stack.cpp
@@ -87,7 +86,7 @@ add_library(project11_navigation_plugins ${PLUGIN_SOURCES})
 add_dependencies(project11_navigation_plugins ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(project11_navigation_plugins ${catkin_LIBRARIES})
 
-install(TARGETS navigator
+install(TARGETS navigator project11_navigation
    ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
    LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
    RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}

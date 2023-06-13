@@ -7,7 +7,7 @@
 namespace project11_navigation
 {
 
-class TaskToTaskWorkflow: public Workflow<std::shared_ptr<Task>, std::shared_ptr<Task> >
+class TaskToTaskWorkflow: public Workflow<Task::Ptr, Task::Ptr>
 {
 };
 

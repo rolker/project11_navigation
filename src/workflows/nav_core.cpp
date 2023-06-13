@@ -70,7 +70,7 @@ void NavCore::configure(std::string name, Context::Ptr context)
   
 }
 
-void NavCore::setGoal(const std::shared_ptr<Task>& input)
+void NavCore::setGoal(const boost::shared_ptr<Task>& input)
 {
   if(input)
     ROS_INFO_STREAM("task:\n" << input->message());

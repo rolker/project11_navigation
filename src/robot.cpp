@@ -92,8 +92,8 @@ void Robot::updateMarkers(visualization_msgs::MarkerArray& marker_array)
   marker.color.r = .75;
   marker.color.g = .75;
   marker.color.b = .25;
-  marker.color.a = .75;
-  marker.scale.x = 0.1;
+  marker.color.a = 1.0;
+  marker.scale.x = 0.2;
   for(auto p: capabilities_.footprint)
   {
     marker.points.push_back(p);

@@ -15,14 +15,14 @@ namespace project11_navigation
 class PluginsLoader;
 class Robot;
 class Task;
-class TaskWrapper;
+class TaskPlugins;
 
 // Assembles the relevant data for accomplishing navigation tasks.
 class Context
 {
 public:
-  typedef std::shared_ptr<Context> Ptr;
-  typedef std::shared_ptr<const Context> ConstPtr;
+  using Ptr = std::shared_ptr<Context>;
+  using ConstPtr = std::shared_ptr<const Context>;
 
   Context();
 
@@ -35,12 +35,8 @@ public:
   tf2_ros::Buffer& tfBuffer();
   geometry_msgs::PoseStamped getPoseInFrame(std::string frame_id);
 
-  boost::shared_ptr<TaskWrapper> getTaskWrapper(std::shared_ptr<Task> task);
-
   std::shared_ptr<PluginsLoader> pluginsLoader();
-
-  std::shared_ptr<costmap_2d::Costmap2DROS> costmap();
-  void setCostmap(std::shared_ptr<costmap_2d::Costmap2DROS> costmap);
+  std::shared_ptr<TaskPlugins> taskPlugins();
 
 private:
   void updateRobotCapabilities(const RobotCapabilities& robot_capabilities);
@@ -62,15 +58,9 @@ private:
   tf2_ros::TransformListener tf_listener_;
 
   std::shared_ptr<PluginsLoader> plugins_loader_;
-
-  std::string default_task_wrapper_ = "generic";
-
-  std::shared_ptr<costmap_2d::Costmap2DROS> costmap_;
-  std::mutex costmap_mutex_;
+  std::shared_ptr<TaskPlugins> task_plugins_;
 
   friend class Robot;
-
-
 };
 
 } // namespace project11_navigation

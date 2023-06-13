@@ -17,7 +17,7 @@ void TaskManager::configure(std::string name, Context::Ptr context)
   ros::NodeHandle nh("~/"+name);
   display_interval_ = ros::Duration(nh.param("display_interval", 0.1));
   ros::NodeHandle top_nh("~");
-  display_pub_ = top_nh.advertise<visualization_msgs::MarkerArray>("visualization_markers", 10);
+  display_pub_ = top_nh.advertise<visualization_msgs::MarkerArray>("visualization_markers", 1);
 }
 
 void TaskManager::setGoal(const std::shared_ptr<TaskList>& input)
@@ -55,11 +55,11 @@ bool TaskManager::getResult(geometry_msgs::TwistStamped& output)
 void TaskManager::updateCurrentTask()
 {
   auto old_task = current_task_;
-  std::vector<std::shared_ptr<Task> > todo_list;
+  std::vector<boost::shared_ptr<Task> > todo_list;
   if(task_list_)
     todo_list = task_list_->tasksByPriority(true);
 
-  std::shared_ptr<Task> new_task;
+  boost::shared_ptr<Task> new_task;
   if(!todo_list.empty())
     new_task = todo_list.front();
 
@@ -85,11 +85,7 @@ void TaskManager::updateCurrentTask()
   {
     visualization_msgs::MarkerArray marker_array;
     for(auto t: todo_list)
-    {
-      auto tw = context_->getTaskWrapper(t);
-      if(tw)
-        tw->getPreviewDisplay(marker_array);
-    }
+      t->getDisplayMarkers(marker_array);
     if(!marker_array.markers.empty())
       display_pub_.publish(marker_array);
     last_display_time_ = now;

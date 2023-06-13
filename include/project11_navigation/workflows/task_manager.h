@@ -27,7 +27,7 @@ private:
   boost::shared_ptr<TaskToTwistWorkflow> executive_;
 
   std::shared_ptr<TaskList> task_list_;
-  std::shared_ptr<Task> current_task_;
+  boost::shared_ptr<Task> current_task_;
 
   ros::Publisher display_pub_;
   ros::Duration display_interval_;

@@ -2,7 +2,7 @@
 #define PROJECT11_NAVIGATION_NAVIGATOR_H
 
 #include <ros/ros.h>
-#include <project11_nav_msgs/Task.h>
+#include <project11_nav_msgs/TaskInformation.h>
 #include <project11_navigation/context.h>
 #include <project11_navigation/interfaces/tasklist_to_twist_workflow.h>
 
@@ -17,7 +17,7 @@ public:
   ~Navigator();
 
 protected:
-  void updateTasks(const std::vector<project11_nav_msgs::Task>& tasks);
+  void updateTasks(const std::vector<project11_nav_msgs::TaskInformation>& tasks);
   virtual void done();
   virtual void iterate(const ros::TimerEvent& event);
 
@@ -35,7 +35,7 @@ private:
   boost::shared_ptr<TaskListToTwistWorkflow> task_manager_;
 
   // Task list as provided by the user
-  std::vector<project11_nav_msgs::Task> task_messages_;
+  std::vector<project11_nav_msgs::TaskInformation> task_messages_;
 
   ros::Publisher display_pub_;
 };

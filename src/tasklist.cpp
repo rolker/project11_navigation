@@ -10,11 +10,11 @@ TaskList::TaskList(Task* parent):parent_task_(parent)
 
 }
 
-void TaskList::update(const std::vector<project11_nav_msgs::Task>& task_msgs)
+void TaskList::update(const std::vector<project11_nav_msgs::TaskInformation>& task_msgs)
 {
   // Create a new vector adding tasks in order they appear.
   // Existing tasks may be copied from existing vector or new ones created if needed.
-  std::vector<std::shared_ptr<Task> > new_task_list;
+  std::vector<boost::shared_ptr<Task> > new_task_list;
   // First, the direct children or top level tasks
   for(const auto& task_msg: task_msgs)
   {
@@ -22,7 +22,7 @@ void TaskList::update(const std::vector<project11_nav_msgs::Task>& task_msgs)
     // Top level or direct child id? Yes if we have a first part but not a second part.
     if(id_parts.first.empty() && !id_parts.second.empty())
     {
-      std::shared_ptr<Task> task;
+      boost::shared_ptr<Task> task;
       for(auto existing_task: tasks_)
       {
         if(existing_task->message().id == task_msg.id)
@@ -32,7 +32,12 @@ void TaskList::update(const std::vector<project11_nav_msgs::Task>& task_msgs)
         }
       }
       if(!task)
-        task = std::shared_ptr<Task>(new Task(task_msg));
+      {
+        Task::Ptr parent;
+        if(parent_task_)
+          parent = parent_task_->self();
+        task = Task::create(task_msg, parent);
+      }
       task->update(task_msgs);
       new_task_list.push_back(task);
     }
@@ -66,15 +71,15 @@ std::pair<std::string, std::string> TaskList::splitChildID(const std::string& ta
   return ret;
 }
 
-const std::vector<std::shared_ptr<Task> >& TaskList::tasks() const
+const std::vector<boost::shared_ptr<Task> >& TaskList::tasks() const
 {
   return tasks_;
 }
 
-std::vector<project11_nav_msgs::Task> TaskList::taskMessages() const
+std::vector<project11_nav_msgs::TaskInformation> TaskList::taskMessages() const
 {
-  std::vector<project11_nav_msgs::Task> ret;
-  std::vector<project11_nav_msgs::Task> children_messages;
+  std::vector<project11_nav_msgs::TaskInformation> ret;
+  std::vector<project11_nav_msgs::TaskInformation> children_messages;
   for(auto t: tasks_)
   {
     ret.push_back(t->message());
@@ -85,14 +90,14 @@ std::vector<project11_nav_msgs::Task> TaskList::taskMessages() const
   return ret;
 }
 
-std::vector<std::shared_ptr<Task> > TaskList::tasksByPriority(bool skip_done) const
+std::vector<boost::shared_ptr<Task> > TaskList::tasksByPriority(bool skip_done) const
 {
-  std::map<int, std::vector<std::shared_ptr<Task> > > priority_map;
+  std::map<int, std::vector<boost::shared_ptr<Task> > > priority_map;
   for(auto t: tasks_)
     if(!skip_done || !t->done())
       priority_map[t->message().priority].push_back(t);
 
-  std::vector<std::shared_ptr<Task> > ret;
+  std::vector<boost::shared_ptr<Task> > ret;
   for(auto task_list: priority_map)
     for(auto t: task_list.second)
       ret.push_back(t);
@@ -116,28 +121,31 @@ bool TaskList::getLastPose(geometry_msgs::PoseStamped& pose, bool recursive) con
   return false;
 }
 
-std::shared_ptr<Task> TaskList::createTaskBefore(std::shared_ptr<Task> task, std::string type)
+boost::shared_ptr<Task> TaskList::createTaskBefore(boost::shared_ptr<Task> task, std::string type)
 {
   auto task_iterator = tasks_.begin();
   while(task && task_iterator != tasks_.end() && *task_iterator != task)
     task_iterator++;
   
-  std::shared_ptr<Task> ret;
+  boost::shared_ptr<Task> ret;
 
   if(!task || task_iterator != tasks_.end())
   {
     // we found the target task
-    project11_nav_msgs::Task tm;
+    project11_nav_msgs::TaskInformation tm;
     tm.type = type;
     if(task)
       tm.priority = task->message().priority;
-    ret = std::make_shared<Task>(tm);
+    Task::Ptr parent;
+    if(parent_task_)
+      parent = parent_task_->self();
+    ret = Task::create(tm, parent);
     tasks_.insert(task_iterator, ret);
   }
   return ret;
 }
 
-std::string TaskList::generateUniqueID(const std::string& prefix, std::shared_ptr<Task> skip) const
+std::string TaskList::generateUniqueID(const std::string& prefix, boost::shared_ptr<Task> skip) const
 {
   std::string path;
   if(parent_task_)
@@ -173,6 +181,12 @@ bool TaskList::allDone(bool recursive) const
     if(!t->done(recursive))
       return false;
   return true;
+}
+
+void TaskList::getDisplayMarkers(visualization_msgs::MarkerArray& marker_array) const
+{
+  for(auto t: tasks_)
+    t->getDisplayMarkers(marker_array);
 }
 
 }  // namespace project11_navigation

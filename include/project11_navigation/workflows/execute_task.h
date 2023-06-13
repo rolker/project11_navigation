@@ -17,11 +17,11 @@ public:
   ~ExecuteTask();
 
   void configure(std::string name, Context::Ptr context) override;
-  void setGoal(const std::shared_ptr<Task>& input) override;
+  void setGoal(const boost::shared_ptr<Task>& input) override;
   bool running() override;
   bool getResult(geometry_msgs::TwistStamped& output) override;
 private:
-  bool updateCurrentHandler();
+  bool updateCurrentWorkflow();
 
   Context::Ptr context_;
   
@@ -31,13 +31,12 @@ private:
   // That means an entry is not needed here if the 
   // plugin to handle a task has the same name as
   // the task type.
-  std::map<std::string, std::string> task_handlers_;
+  std::map<std::string, std::string> task_workflows_;
   
-  std::shared_ptr<Task> current_task_;
-  std::shared_ptr<Task> current_nav_task_;
-  boost::shared_ptr<TaskToTwistWorkflow> current_handler_;
+  boost::shared_ptr<Task> current_task_;
+  boost::shared_ptr<Task> current_nav_task_;
+  boost::shared_ptr<TaskToTwistWorkflow> current_workflow_;
 
-  ros::Publisher display_pub_;
 };
 
 }  // namespace project11_navigation
