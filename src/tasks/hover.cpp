@@ -55,17 +55,18 @@ void HoverTask::getDisplayMarkers(visualization_msgs::MarkerArray& marker_array)
     visualization_msgs::Marker marker;
     marker.header.frame_id = pose.header.frame_id;
     marker.header.stamp = ros::Time::now();
-    marker.id = marker_array.markers.size();
+    marker.id = 1;
     marker.ns = message().id;
     marker.action = visualization_msgs::Marker::ADD;
     marker.type = visualization_msgs::Marker::SPHERE;
     marker.pose = pose.pose;
-    marker.color.r = .25;
-    marker.color.g = .4;
-    marker.color.b = .25;
+    marker.color.r = .0;
+    marker.color.g = .5;
+    marker.color.b = .0;
     marker.color.a = .5;
     marker.scale.x = 10.0;
     marker.scale.y = 10.0;
+    marker.lifetime = ros::Duration(2.0);
     marker_array.markers.push_back(marker);
   }
 }
