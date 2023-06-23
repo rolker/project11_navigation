@@ -22,13 +22,13 @@ protected:
   virtual void iterate(const ros::TimerEvent& event);
 
   std::shared_ptr<TaskList> task_list_;
+  std::shared_ptr<Context> context_;
 private:
   ros::NodeHandle nodeHandle_;
   
   ros::Timer iterate_timer_;
 
   std::shared_ptr<Robot> robot_;
-  std::shared_ptr<Context> context_;
 
   double controller_frequency_ = 10.0;
 

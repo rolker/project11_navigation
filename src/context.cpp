@@ -96,4 +96,14 @@ geometry_msgs::PoseStamped Context::getPoseInFrame(std::string frame_id)
   return ret;
 }
 
+void Context::setCurrentNavTaskID(std::string id)
+{
+  current_nav_task_id_ = id;
+}
+
+const std::string & Context::currentNavTaskID() const
+{
+  return current_nav_task_id_;
+}
+
 } // namespace project11_navigation

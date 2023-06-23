@@ -5,4 +5,5 @@ project11_nav_msgs/TaskInformation[] tasks
 project11_nav_msgs/TaskInformation[] tasks
 ---
 # feedback
+string current_nav_task
 project11_nav_msgs/TaskInformation[] tasks

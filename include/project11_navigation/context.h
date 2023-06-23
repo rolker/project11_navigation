@@ -38,6 +38,9 @@ public:
   std::shared_ptr<PluginsLoader> pluginsLoader();
   std::shared_ptr<TaskPlugins> taskPlugins();
 
+  void setCurrentNavTaskID(std::string id);
+  const std::string & currentNavTaskID() const;
+
 private:
   void updateRobotCapabilities(const RobotCapabilities& robot_capabilities);
   void updateOdometry(const nav_msgs::Odometry& odom);
@@ -59,6 +62,8 @@ private:
 
   std::shared_ptr<PluginsLoader> plugins_loader_;
   std::shared_ptr<TaskPlugins> task_plugins_;
+
+  std::string current_nav_task_id_;
 
   friend class Robot;
 };

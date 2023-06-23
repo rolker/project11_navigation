@@ -35,6 +35,7 @@ void NavigatorAction::iterate(const ros::TimerEvent& event)
   if(action_server_.isActive() && event.current_real - last_feedback_send_time_ > ros::Duration(1.0))
   {
     project11_navigation::RunTasksFeedback feedback;
+    feedback.current_nav_task = context_->currentNavTaskID();
     if(task_list_)
       feedback.tasks = task_list_->taskMessages();
     action_server_.publishFeedback(feedback);

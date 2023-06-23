@@ -3,6 +3,7 @@
 #include <project11_navigation/workflows/task_to_twist_stack.h>
 #include <project11_navigation/plugins_loader.h>
 #include <pluginlib/class_list_macros.h>
+#include <std_msgs/String.h>
 
 PLUGINLIB_EXPORT_CLASS(project11_navigation::ExecuteTask, project11_navigation::TaskToTwistWorkflow)
 
@@ -55,6 +56,11 @@ bool ExecuteTask::running()
 
 bool ExecuteTask::getResult(geometry_msgs::TwistStamped& output)
 {
+  if(current_nav_task_)
+    context_->setCurrentNavTaskID(current_nav_task_->message().id);
+  else
+    context_->setCurrentNavTaskID("");
+
   if(running())
     return current_workflow_->getResult(output);
 
