@@ -60,6 +60,10 @@ Robot::Robot(Context::Ptr context)
 
   capabilities_.radius = readDoubleOrIntParameter(nh, "robot/radius", capabilities_.radius);
 
+  capabilities_.waypoint_reached_distance = readDoubleOrIntParameter(nh, "robot/waypoint_reached_distance", capabilities_.waypoint_reached_distance);
+
+  capabilities_.survey_lead_in_distance = readDoubleOrIntParameter(nh, "robot/survey_lead_in_distance", capabilities_.survey_lead_in_distance);
+
   context_->updateRobotCapabilities(capabilities_);
 }
 

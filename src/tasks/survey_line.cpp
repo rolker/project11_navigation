@@ -14,15 +14,14 @@ void SurveyLineTask::updateTransit(const geometry_msgs::PoseStamped& from_pose, 
   {
     auto first_segment_direction_vector = normalize(vectorBetween(message().poses[0].pose, message().poses[1].pose));
 
-    // \todo get this from a parameter
-    double lead_in_distance = 2.0;
+    double lead_in_distance = context->getRobotCapabilities().survey_lead_in_distance;
 
     geometry_msgs::PoseStamped in_pose = message().poses[0];
     in_pose.pose.position.x -= first_segment_direction_vector.x*lead_in_distance;
     in_pose.pose.position.y -= first_segment_direction_vector.y*lead_in_distance;
     in_pose.pose.position.z -= first_segment_direction_vector.z*lead_in_distance;
 
-    if(length(vectorBetween(from_pose.pose, in_pose.pose))>1.0)
+    if(length(vectorBetween(from_pose.pose, in_pose.pose)) > context->getRobotCapabilities().waypoint_reached_distance)
       updateTransitTo(from_pose, in_pose);
     else
       clearTransitTo();
@@ -32,7 +31,7 @@ void SurveyLineTask::updateTransit(const geometry_msgs::PoseStamped& from_pose, 
     geometry_msgs::PoseStamped in_pose;
     if(getFirstPose(in_pose))
     {
-      if(length(vectorBetween(from_pose.pose, in_pose.pose))>1.0)
+      if(length(vectorBetween(from_pose.pose, in_pose.pose)) > context->getRobotCapabilities().waypoint_reached_distance)
         updateTransitTo(from_pose, in_pose);
     }
     else 

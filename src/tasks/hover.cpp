@@ -14,7 +14,7 @@ void HoverTask::updateTransit(const geometry_msgs::PoseStamped& from_pose, geome
   geometry_msgs::PoseStamped in_pose;
   if(getFirstPose(in_pose))
   {
-    if(length(vectorBetween(from_pose.pose, in_pose.pose))>10.0)
+    if(length(vectorBetween(from_pose.pose, in_pose.pose)) > context->getRobotCapabilities().waypoint_reached_distance)
     {
       auto transit = updateTransitTo(from_pose, in_pose);
       auto preview_planner = context->pluginsLoader()->getPlugin<TaskToTaskWorkflow>("preview");
@@ -53,6 +53,7 @@ void HoverTask::getDisplayMarkers(visualization_msgs::MarkerArray& marker_array)
   if(getFirstPose(pose))
   {
     visualization_msgs::Marker marker;
+    ROS_DEBUG_STREAM_NAMED("display", "frame_id: " << pose.header.frame_id);
     marker.header.frame_id = pose.header.frame_id;
     marker.header.stamp = ros::Time::now();
     marker.id = 1;

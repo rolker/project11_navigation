@@ -14,7 +14,7 @@ void GenericTask::updateTransit(const geometry_msgs::PoseStamped& from_pose, geo
   geometry_msgs::PoseStamped in_pose;
   if(task_->getFirstPose(in_pose))
   {
-    if(length(vectorBetween(from_pose.pose, in_pose.pose))>10.0)
+    if(length(vectorBetween(from_pose.pose, in_pose.pose))>context_->getRobotCapabilities().waypoint_reached_distance)
     {
       auto transit = task_->updateTransitTo(from_pose, in_pose);
       auto preview_planner = context_->pluginsLoader()->getPlugin<TaskToTaskWorkflow>("preview");
