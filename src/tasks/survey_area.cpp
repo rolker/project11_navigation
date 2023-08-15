@@ -26,7 +26,7 @@ void SurveyAreaTask::updateTransit(const geometry_msgs::PoseStamped& from_pose, 
   geometry_msgs::PoseStamped in_pose;
   if(getFirstPose(in_pose))
   {
-    if(length(vectorBetween(from_pose.pose, in_pose.pose)) > context->getRobotCapabilities().waypoint_reached_distance)
+    if(length(vectorBetween(from_pose.pose, in_pose.pose)) > context->navigatorSettings().waypoint_reached_distance)
       updateTransitTo(from_pose, in_pose);
   }
   else 

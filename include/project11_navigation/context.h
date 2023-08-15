@@ -5,6 +5,7 @@
 #include <geometry_msgs/PoseStamped.h>
 #include <tf2_ros/transform_listener.h>
 #include <costmap_2d/costmap_2d_ros.h>
+#include <project11_navigation/navigator_settings.h>
 #include <project11_navigation/robot_capabilities.h>
 #include <project11_navigation/environment.h>
 #include <mutex>
@@ -24,10 +25,11 @@ public:
   using Ptr = std::shared_ptr<Context>;
   using ConstPtr = std::shared_ptr<const Context>;
 
-  Context();
+  Context(NavigatorSettings nav_settings);
 
   RobotCapabilities getRobotCapabilities();
   nav_msgs::Odometry getOdometry();
+  const NavigatorSettings& navigatorSettings() const;
 
   Environment& environment();
 
@@ -45,6 +47,8 @@ private:
   void updateRobotCapabilities(const RobotCapabilities& robot_capabilities);
   void updateOdometry(const nav_msgs::Odometry& odom);
   void updateOutputEnabled(bool enabled);
+
+  NavigatorSettings navigator_settings_;
 
   RobotCapabilities robot_capabilities_;
   std::mutex robot_capabilities_mutex_;

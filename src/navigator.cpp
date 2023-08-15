@@ -4,6 +4,7 @@
 #include <project11_navigation/workflows/task_manager.h>
 #include <project11_navigation/plugins_loader.h>
 #include <project11_navigation/task_plugins.h>
+#include <project11_navigation/utilities.h>
 
 namespace project11_navigation
 {
@@ -17,7 +18,13 @@ Navigator::Navigator()
 
   ROS_INFO_STREAM("Controller frequency: " << controller_frequency_ << " period: " << controller_period);
 
-  context_ = Context::Ptr(new Context);
+  NavigatorSettings nav_settings;
+  ros::NodeHandle private_nh("~");
+  nav_settings.waypoint_reached_distance = readDoubleOrIntParameter(private_nh, "waypoint_reached_distance", nav_settings.waypoint_reached_distance);
+
+  nav_settings.survey_lead_in_distance = readDoubleOrIntParameter(private_nh, "survey_lead_in_distance", nav_settings.survey_lead_in_distance);
+
+  context_ = Context::Ptr(new Context(nav_settings));
   context_->pluginsLoader()->configure(context_);
   context_->taskPlugins()->configure(context_);
   Task::setCreator(context_->taskPlugins());
@@ -30,7 +37,7 @@ Navigator::Navigator()
   if(!task_manager_)
     ROS_FATAL_STREAM("Unable to load toplevel task manager plugin: " << task_manager_plugin);
 
-  display_pub_ = ros::NodeHandle("~").advertise<visualization_msgs::MarkerArray>("visualization_markers", 10);
+  display_pub_ = private_nh.advertise<visualization_msgs::MarkerArray>("visualization_markers", 10);
 
 
   iterate_timer_ = nodeHandle_.createTimer(ros::Duration(controller_period), &Navigator::iterate, this);

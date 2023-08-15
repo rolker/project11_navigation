@@ -30,12 +30,6 @@ struct RobotCapabilities
 
   /// Radius used for collison checking
   double radius;
-
-  /// Distance in meters within which a waypoint is deemed reached
-  double waypoint_reached_distance = 10.0;
-
-  /// Distance in meters to extend the start of a survey line to allow heading to settle
-  double survey_lead_in_distance = 2.0;
 };
 
 }

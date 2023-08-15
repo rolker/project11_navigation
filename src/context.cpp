@@ -11,11 +11,16 @@
 namespace project11_navigation
 {
 
-Context::Context():
-  tf_listener_(tf_buffer_),
+Context::Context(NavigatorSettings nav_settings):
+  navigator_settings_(nav_settings), tf_listener_(tf_buffer_),
   plugins_loader_(new PluginsLoader()), task_plugins_(new TaskPlugins())
 {
  
+}
+
+const NavigatorSettings& Context::navigatorSettings() const
+{
+  return navigator_settings_;
 }
 
 RobotCapabilities Context::getRobotCapabilities()
