@@ -27,7 +27,7 @@ public:
   // Creates a new Task or derived Task if a creator is set to do so.
   static boost::shared_ptr<Task> create(const project11_nav_msgs::TaskInformation& task_msg, Task::Ptr parent);
 
-  // Sets a factory function that creates new Tasks or drived Tasks.
+  // Sets a factory function that creates new Tasks or derived Tasks.
   static void setCreator(std::shared_ptr<TaskPlugins> creator);
 
   bool update(const project11_nav_msgs::TaskInformation& task_msg, bool check_id = true);
