@@ -10,6 +10,7 @@ plugins:
     executive: project11_navigation/ExecuteTask
     transit: project11_navigation/TaskToTwistStack
     hover: hover/Hover
+    idle: project11_navigation/Idle
     path_follower: path_follower/PathFollower
     survey_line: project11_navigation/TaskToTwistStack
   TaskListToTaskListWorkflow:
@@ -19,6 +20,7 @@ plugins:
   Tasks:
     goto: project11_navigation/GotoTask
     hover: project11_navigation/HoverTask
+    idle: project11_navigation/IdleTask
     survey_area: project11_navigation/SurveyAreaTask
     survey_line: project11_navigation/SurveyLineTask
     transit: project11_navigation/TransitTask

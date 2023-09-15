@@ -12,6 +12,12 @@
     <description>Project11 Navigation hover task wrapper.</description>
   </class>
 
+   <class base_class_type="project11_navigation::Task"
+      type="project11_navigation::IdleTask"
+      name="project11_navigation/IdleTask">
+    <description>Project11 Navigation idle task wrapper.</description>
+  </class>
+
   <class base_class_type="project11_navigation::Task"
       type="project11_navigation::SurveyAreaTask"
       name="project11_navigation/SurveyAreaTask">
@@ -28,6 +34,12 @@
       type="project11_navigation::TransitTask"
       name="project11_navigation/TransitTask">
     <description>Project11 Navigation wrapper for transit task.</description>
+  </class>
+
+   <class base_class_type="project11_navigation::TaskToTwistWorkflow"
+      type="project11_navigation::Idle"
+      name="project11_navigation/Idle">
+    <description>Project11 Navigation idle task wrapper.</description>
   </class>
 
   <class base_class_type="project11_navigation::TaskToTwistWorkflow"
