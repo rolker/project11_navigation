@@ -13,12 +13,18 @@ void SurveyAreaTask::updateTransit(const geometry_msgs::PoseStamped& from_pose, 
   geometry_msgs::PoseStamped pose = from_pose;
   bool has_survey_lines = false;
   for(auto t: children().tasksByPriority())
+  {
     if(t->message().type == "survey_line")
     {
       t->updateTransit(pose, out_pose, context);
       pose = out_pose;
       has_survey_lines = true;
     }
+    if(t->message().type == "idle")
+    {
+      has_survey_lines = true;
+    }
+  }
 
   if(has_survey_lines)
     return;
@@ -44,6 +50,8 @@ boost::shared_ptr<Task> SurveyAreaTask::getCurrentNavigationTask()
       return t;
     if(t->message().type == "survey_line")
       return t->getCurrentNavigationTask();
+    if(t->message().type == "idle")
+      return t;
     auto status = t->status();
     status["skipped"] = "Skipped by SurveyAreaTask";
     t->setStatus(status);
