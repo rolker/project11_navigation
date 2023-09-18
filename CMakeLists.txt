@@ -72,10 +72,12 @@ target_link_libraries(navigator
 set(PLUGIN_SOURCES
   src/tasks/goto.cpp
   src/tasks/hover.cpp
+  src/tasks/idle.cpp
   src/tasks/survey_area.cpp
   src/tasks/survey_line.cpp
   src/tasks/transit.cpp
   src/workflows/execute_task.cpp
+  src/workflows/idle.cpp
   src/workflows/nav_core.cpp
   src/workflows/task_connector.cpp
   src/workflows/task_manager.cpp
