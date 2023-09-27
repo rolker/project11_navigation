@@ -79,7 +79,7 @@ void Navigator::iterate(const ros::TimerEvent& event)
     cmd_vel.header.frame_id = robot_->baseFrame();
     if(cmd_vel.header.frame_id.empty())
     {
-      ROS_WARN_STREAM_THROTTLE(1.0, "Waiting for odom with non-empty child_frame_id");
+      ROS_WARN_STREAM_THROTTLE(10.0, "Waiting for odom with non-empty child_frame_id");
       return;
     }
     task_manager_->getResult(cmd_vel);
