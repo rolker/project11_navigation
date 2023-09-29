@@ -18,6 +18,7 @@ plugins:
   TaskListToTwistWorkflow:
     task_manager: project11_navigation/TaskManager
   Tasks:
+    behavior: project11_navigation/BehaviorTask
     goto: project11_navigation/GotoTask
     hover: project11_navigation/HoverTask
     idle: project11_navigation/IdleTask

@@ -1,4 +1,4 @@
-#include "project11_navigation/tasklist.h"
+#include "project11_navigation/task_list.h"
 #include "project11_navigation/task.h"
 #include <ros/ros.h>
 
@@ -19,7 +19,7 @@ void TaskList::update(const std::vector<project11_nav_msgs::TaskInformation>& ta
   for(const auto& task_msg: task_msgs)
   {
     auto id_parts = splitChildID(task_msg.id);
-    // Top level or direct child id? Yes if we have a first part but not a second part.
+    // Top level or direct child id? Yes if we have a second part but not a first part.
     if(id_parts.first.empty() && !id_parts.second.empty())
     {
       boost::shared_ptr<Task> task;
@@ -55,11 +55,11 @@ std::pair<std::string, std::string> TaskList::splitChildID(const std::string& ta
   if(!parent_task_ || task_id.substr(0, parent_path.size()) == parent_path)
   {
     std::string child_part = task_id;
-    // remove the common begining as well as the delimiter
+    // remove the common beginning as well as the delimiter
     if(task_id.size() > parent_path.size())
       child_part = task_id.substr(parent_path.size());
-    // find next delimiter, if any
-    auto delimiter = child_part.find("/");
+    // find last delimiter, if any
+    auto delimiter = child_part.rfind("/");
     if(delimiter == std::string::npos)
       ret.second = child_part;
     else

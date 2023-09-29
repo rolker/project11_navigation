@@ -1,6 +1,12 @@
 <library path="lib/libproject11_navigation_plugins">
 
   <class base_class_type="project11_navigation::Task"
+      type="project11_navigation::BehaviorTask"
+      name="project11_navigation/BehaviorTask">
+    <description>Project11 Navigation wrapper for a behavior task.</description>
+  </class>
+
+  <class base_class_type="project11_navigation::Task"
       type="project11_navigation::GotoTask"
       name="project11_navigation/GotoTask">
     <description>Project11 Navigation wrapper for a goto task.</description>

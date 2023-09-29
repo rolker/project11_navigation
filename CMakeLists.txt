@@ -42,7 +42,7 @@ set(NAVIGATOR_LIB_SOURCES
   src/platform.cpp
   src/robot_capabilities.cpp
   src/task.cpp
-  src/tasklist.cpp
+  src/task_list.cpp
   src/utilities.cpp
 )
 
@@ -70,6 +70,7 @@ target_link_libraries(navigator
 )
 
 set(PLUGIN_SOURCES
+  src/tasks/behavior.cpp
   src/tasks/goto.cpp
   src/tasks/hover.cpp
   src/tasks/idle.cpp
