@@ -40,7 +40,9 @@ class TaskList:
     '''
     Return the task corresponding to the task_id.
     '''
-    return self.tasks[task_id]
+    if task_id is self.tasks:
+      return self.tasks[task_id]
+    return None
 
   def parentTask(self, task_id: str) -> 'Task':
     '''
