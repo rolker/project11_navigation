@@ -11,7 +11,9 @@
   <buildtool_depend>catkin</buildtool_depend>
   <depend>actionlib</depend>
   <depend>actionlib_msgs</depend>
+  <depend>behaviortree_cpp</depend>
   <depend>costmap_2d</depend>
+  <depend>dubins_curves</depend>
   <depend>geometry_msgs</depend>
   <depend>grid_map_ros</depend>
   <depend>nav_core</depend>
@@ -24,6 +26,6 @@
   <depend>yaml-cpp</depend>
   
   <export>
-    <project11_navigation plugin="${prefix}/plugins.xml"/>
+    <behaviortree_cpp bt_lib_plugin="libproject11_navigation_bt_plugins"/>
   </export>
 </package>

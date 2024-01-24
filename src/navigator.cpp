@@ -1,46 +1,52 @@
 #include <project11_navigation/navigator.h>
 #include <ros/ros.h>
-#include <project11_navigation/robot.h>
-#include <project11_navigation/workflows/task_manager.h>
-#include <project11_navigation/plugins_loader.h>
-#include <project11_navigation/task_plugins.h>
+#include <ros/package.h>
+#include <project11_navigation/context.h>
 #include <project11_navigation/utilities.h>
+#include <project11_navigation/task_list.h>
+#include <filesystem>
+#include <project11_navigation/bt_types.h>
 
 namespace project11_navigation
 {
 
-Navigator::Navigator()
+Navigator::Navigator(std::string name):
+  action_server_(node_handle_, name+"/run_tasks", false)
 {
+  registerJsonDefinitions();
+  
+  ros::NodeHandle nh;
+  odom_sub_ = nh.subscribe("odom", 10, &Navigator::odometryCallback, this);
 
-  ros::param::param("~controller_frequency", controller_frequency_, controller_frequency_);
-
-  double controller_period = 1.0/controller_frequency_;
-
-  ROS_INFO_STREAM("Controller frequency: " << controller_frequency_ << " period: " << controller_period);
-
-  NavigatorSettings nav_settings;
   ros::NodeHandle private_nh("~");
-  nav_settings.waypoint_reached_distance = readDoubleOrIntParameter(private_nh, "waypoint_reached_distance", nav_settings.waypoint_reached_distance);
 
-  nav_settings.survey_lead_in_distance = readDoubleOrIntParameter(private_nh, "survey_lead_in_distance", nav_settings.survey_lead_in_distance);
-
-  context_ = Context::Ptr(new Context(nav_settings));
-  context_->pluginsLoader()->configure(context_);
-  context_->taskPlugins()->configure(context_);
-  Task::setCreator(context_->taskPlugins());
-
-  robot_ = std::shared_ptr<Robot>(new Robot(context_));
-
-  std::string task_manager_plugin = ros::param::param<std::string>("~task_manager_plugin", "task_manager");
-  task_manager_ = context_->pluginsLoader()->getPlugin<TaskListToTwistWorkflow>(task_manager_plugin);
-
-  if(!task_manager_)
-    ROS_FATAL_STREAM("Unable to load toplevel task manager plugin: " << task_manager_plugin);
+  context_ = std::make_shared<Context>();
 
   display_pub_ = private_nh.advertise<visualization_msgs::MarkerArray>("visualization_markers", 10);
 
+  blackboard_ = BT::Blackboard::create();
 
-  iterate_timer_ = nodeHandle_.createTimer(ros::Duration(controller_period), &Navigator::iterate, this);
+  blackboard_->set("context", context_);
+
+  tree_ = buildBehaviorTree();
+  
+  BT::printTreeRecursively(tree_.rootNode());
+
+  groot_ = std::make_shared<BT::Groot2Publisher>(tree_);
+
+  std::string log_file = private_nh.param("log_file", std::string()); 
+
+  if(!log_file.empty())
+    logger_ = std::make_shared<BT::FileLogger2>(tree_, log_file);
+
+  //console_logger_ = std::make_shared<BT::StdCoutLogger>(tree_);
+
+  action_server_.registerGoalCallback(std::bind(&Navigator::goalCallback, this));
+  action_server_.registerPreemptCallback(std::bind(&Navigator::preemptCallback, this));
+  action_server_.start();
+
+
+  //iterate_timer_ = node_handle_.createTimer(ros::Duration(controller_period), &Navigator::iterate, this);
 }
 
 Navigator::~Navigator()
@@ -48,52 +54,110 @@ Navigator::~Navigator()
 
 }
 
-void Navigator::updateTasks(const std::vector<project11_nav_msgs::TaskInformation>& tasks)
+BT::Tree Navigator::buildBehaviorTree()
 {
-  ROS_DEBUG_STREAM("update with " << tasks.size() << " tasks");
-  task_messages_ = tasks;
-  if(tasks.empty())
-    task_list_.reset();
-  else
+  BT::BehaviorTreeFactory factory;
+
+  factory.registerFromROSPlugins();
+
+  /// \todo Allow extra directories from param server
+
+  std::vector<std::string> packages = {"project11_navigation", "hover"};
+
+  for (auto package: packages)
   {
-    if(!task_list_)
-      task_list_ = std::make_shared<TaskList>();
-    task_list_->update(tasks);
-  }
-  task_manager_->setGoal(task_list_);
-}
-
-void Navigator::iterate(const ros::TimerEvent& event)
-{
-  ROS_DEBUG_STREAM("last expected: " << event.last_expected << " last real: " << event.last_real << " current_expected: " << event.current_expected << " current real: " << event.current_real << " last duration: " << event.profile.last_duration);
-
-  visualization_msgs::MarkerArray array;
-  robot_->updateMarkers(array);
-  if(!array.markers.empty())
-    display_pub_.publish(array);
-
-  if(task_manager_->running())
-  {
-    geometry_msgs::TwistStamped cmd_vel;
-    cmd_vel.header.stamp = ros::Time::now();
-    cmd_vel.header.frame_id = robot_->baseFrame();
-    if(cmd_vel.header.frame_id.empty())
+    std::string tree_dir = ros::package::getPath(package)+"/behavior_trees";
+    for (auto const& entry : std::filesystem::directory_iterator(tree_dir)) 
     {
-      ROS_WARN_STREAM_THROTTLE(10.0, "Waiting for odom with non-empty child_frame_id");
-      return;
+      if( entry.path().extension() == ".xml")
+      {
+        factory.registerBehaviorTreeFromFile(entry.path().string());
+      }
     }
-    task_manager_->getResult(cmd_vel);
-    robot_->sendControls(cmd_vel);
   }
-  else
-  {
-    done();
-  }
+
+  return factory.createTree("NavigatorSequence", blackboard_);
 }
 
-void Navigator::done()
+void Navigator::goalCallback()
 {
+  auto goal = action_server_.acceptNewGoal();
+  ROS_DEBUG_STREAM("update with " << goal->tasks.size() << " tasks");
+
+  tree_.haltTree();
+
+  if(goal->tasks.empty())
+    blackboard_->set("task_messages", std::shared_ptr<std::vector<project11_nav_msgs::TaskInformation> >());
+  else
+    blackboard_->set("task_messages", std::make_shared<std::vector<project11_nav_msgs::TaskInformation> >(goal->tasks));
+}
+
+void Navigator::odometryCallback(const nav_msgs::Odometry::ConstPtr& msg)
+{
+  context_->robot().odometryCallback(msg);
+
+  if(action_server_.isActive())
+  {
+    auto status = tree_.tickOnce();
+    switch(status)
+    {
+      case BT::NodeStatus::SUCCESS:
+      {
+        project11_navigation::RunTasksResult result;
+        auto task_list_entry = blackboard_->getEntry("task_list");
+        if(task_list_entry)
+        {
+          auto task_list = task_list_entry->value.cast<std::shared_ptr<TaskList> >();
+          if(task_list)
+            result.tasks = task_list->taskMessages();
+        }
+        action_server_.setSucceeded(result);
+        break;
+      }
+      case BT::NodeStatus::FAILURE:
+        action_server_.setAborted();
+        break;
+      case BT::NodeStatus::RUNNING:
+      {
+        auto cmd_vel = blackboard_->getEntry("command_velocity");
+        if(cmd_vel && cmd_vel->value.isType<geometry_msgs::TwistStamped>())
+        {
+          context_->robot().sendControls(cmd_vel->value.cast<geometry_msgs::TwistStamped>());
+        }
+
+        auto marker_array = blackboard_->getEntry("marker_array");
+        if(marker_array && marker_array->value.isType<std::shared_ptr<visualization_msgs::MarkerArray> >())
+        {
+          auto ma = marker_array->value.cast<std::shared_ptr<visualization_msgs::MarkerArray> >();
+          if(ma)
+            display_pub_.publish(*ma);
+        }
+      }
+      break;
+    }
+
+    project11_navigation::RunTasksFeedback feedback;
+    auto current_nav_task = blackboard_->getEntry("active_task_id");
+    if(current_nav_task && current_nav_task->value.isString())
+      feedback.feedback.current_navigation_task = current_nav_task->value.cast<std::string>();
+    auto task_list_entry = blackboard_->getEntry("task_list");
+    if(task_list_entry)
+    {
+      auto task_list = task_list_entry->value.cast<std::shared_ptr<TaskList> >();
+      if(task_list)
+        feedback.feedback.tasks = task_list->taskMessages();
+    }
+    action_server_.publishFeedback(feedback);
+  }
 
 }
+
+void Navigator::preemptCallback()
+{
+  action_server_.setPreempted();
+  blackboard_->set("task_messages", std::shared_ptr<std::vector<project11_nav_msgs::TaskInformation> >());
+  tree_.haltTree();
+}
+
 
 } // namespace project11_navigation

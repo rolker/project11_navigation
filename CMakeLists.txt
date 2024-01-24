@@ -1,12 +1,14 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(project11_navigation)
 
-add_compile_options(-std=c++11)
+set(CMAKE_CXX_STANDARD 17)
 
 find_package(catkin REQUIRED COMPONENTS
   actionlib
   actionlib_msgs
+  behaviortree_cpp
   costmap_2d
+  dubins_curves
   genmsg
   geometry_msgs
   grid_map_ros
@@ -27,7 +29,7 @@ generate_messages(DEPENDENCIES actionlib_msgs project11_nav_msgs)
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES project11_navigation project11_navigation_plugins
-  CATKIN_DEPENDS actionlib actionlib_msgs costmap_2d geometry_msgs grid_map_ros nav_core pluginlib project11_nav_msgs roscpp rospy tf2 visualization_msgs yaml-cpp
+  CATKIN_DEPENDS actionlib actionlib_msgs behaviortree_cpp costmap_2d dubins_curves geometry_msgs grid_map_ros nav_core pluginlib project11_nav_msgs roscpp rospy tf2 visualization_msgs yaml-cpp
 #  DEPENDS system_lib
 )
 
@@ -52,12 +54,10 @@ add_dependencies(project11_navigation ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catk
 target_link_libraries(project11_navigation ${catkin_LIBRARIES} yaml-cpp)
 
 set(NAVIGATOR_SOURCES
+  src/bt_types.cpp
   src/main.cpp
   src/navigator.cpp
-  src/navigator_action.cpp
-  src/plugins_loader.cpp
   src/robot.cpp
-  src/task_plugins.cpp
 )
 
 add_executable(navigator ${NAVIGATOR_SOURCES})
@@ -69,27 +69,35 @@ target_link_libraries(navigator
   ${catkin_LIBRARIES}
 )
 
-set(PLUGIN_SOURCES
-  src/tasks/behavior.cpp
-  src/tasks/goto.cpp
-  src/tasks/hover.cpp
-  src/tasks/idle.cpp
-  src/tasks/survey_area.cpp
-  src/tasks/survey_line.cpp
-  src/tasks/transit.cpp
-  src/workflows/execute_task.cpp
-  src/workflows/idle.cpp
-  src/workflows/nav_core.cpp
-  src/workflows/task_connector.cpp
-  src/workflows/task_manager.cpp
-  src/workflows/task_to_twist_stack.cpp
+set(BT_PLUGIN_SOURCES
+  src/actions/baxevani_controller.cpp
+  src/actions/crabbing_path_follower.cpp
+  src/actions/debug_blackboard.cpp
+  src/actions/generate_plan.cpp
+  src/actions/get_task_data_double.cpp
+  src/actions/get_task_data_string.cpp
+  src/actions/get_sub_tasks.cpp
+  src/actions/navigator_settings_loader.cpp
+  src/actions/robot_capabilities_loader.cpp
+  src/actions/set_pose_from_task.cpp
+  src/actions/set_task_done.cpp
+  src/actions/set_trajectory_from_task.cpp
+  src/actions/task_list_updater.cpp
+  src/actions/update_current_segment.cpp
+  src/actions/update_current_task.cpp
+  src/actions/update_state.cpp
+  src/actions/visualize_trajectory.cpp
+  src/conditions/all_tasks_done.cpp
+  src/conditions/goal_reached.cpp
+  src/conditions/plan_needed.cpp
+  src/register_behavior_tree_nodes.cpp
 )
 
-add_library(project11_navigation_plugins ${PLUGIN_SOURCES})
-add_dependencies(project11_navigation_plugins ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(project11_navigation_plugins ${catkin_LIBRARIES})
+add_library(project11_navigation_bt_plugins SHARED ${BT_PLUGIN_SOURCES})
+target_link_libraries(project11_navigation_bt_plugins PRIVATE ${BTCPP_LIBRARY} ${catkin_LIBRARIES})
+target_compile_definitions(project11_navigation_bt_plugins PRIVATE  BT_PLUGIN_EXPORT )
 
-install(TARGETS navigator project11_navigation
+install(TARGETS navigator project11_navigation  project11_navigation_bt_plugins
    ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
    LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
    RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}

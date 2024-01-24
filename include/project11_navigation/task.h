@@ -4,31 +4,25 @@
 #include <project11_navigation/task_list.h>
 #include <yaml-cpp/yaml.h>
 #include <visualization_msgs/MarkerArray.h>
-#include <boost/weak_ptr.hpp>
 
 namespace project11_navigation
 {
 
-class Context;
-class TaskPlugins;
+class Task;
+using TaskPtr = std::shared_ptr<Task>;
+using TaskConstPtr = std::shared_ptr<const Task>;
+
 
 // Represents the execution state of a task.
 class Task
 {
 public:
-  using Ptr = boost::shared_ptr<Task>;
-  using ConstPtr = boost::shared_ptr<const Task>;
-
-
   // \todo make this private without breaking the create() method.
   Task();
   virtual ~Task() = default;
 
   /// Creates a new Task or derived Task if a creator is set to do so.
-  static boost::shared_ptr<Task> create(const project11_nav_msgs::TaskInformation& task_msg, Task::Ptr parent);
-
-  /// Sets a factory function that creates new Tasks or derived Tasks.
-  static void setCreator(std::shared_ptr<TaskPlugins> creator);
+  static TaskPtr create(const project11_nav_msgs::TaskInformation& task_msg, TaskPtr parent);
 
   /// Update or replace this task's TaskInformation.
   /// If check_id is true (default), only replaces the message
@@ -60,7 +54,7 @@ public:
   /// Sets the id of the task argument as a child of this task.
   /// The id parameter gets added to this TaskInformation's id
   /// separated with a '/'.
-  void setChildID(boost::shared_ptr<Task> task, std::string id);
+  void setChildID(std::shared_ptr<Task> task, std::string id);
 
   /// Sets the TaskInformation id and updates the modification time.
   void setID(std::string id);
@@ -104,41 +98,23 @@ public:
   /// if not null. If task argument is null, the
   /// new task is appended to the children. No new task
   /// is created if task is not nullptr and is not found.
-  boost::shared_ptr<Task> createChildTaskBefore(boost::shared_ptr<Task> task = {}, std::string type = "");
+  std::shared_ptr<Task> createChildTaskBefore(std::shared_ptr<Task> task = {}, std::string type = "");
 
 
-  /// \todo split the following to a TaskPluginBase or similar
-  /// task and make the above a library that can be used by other 
-  /// packages
+  /// Remove children tasks.
+  void clearChildren();
 
-  virtual void updateTransit(const geometry_msgs::PoseStamped& starting_pose, geometry_msgs::PoseStamped& out_pose, std::shared_ptr<Context> context);
-
-  virtual boost::shared_ptr<Task> getCurrentNavigationTask();
-
-
-  boost::shared_ptr<Task> updateTransitTo(const geometry_msgs::PoseStamped& from_pose, const geometry_msgs::PoseStamped& in_pose);
-
-  void clearTransitTo();
-
-  // Allows visualization markers to be added to preview task navigation.
-  virtual void getDisplayMarkers(visualization_msgs::MarkerArray& marker_array) const;
-
-  visualization_msgs::MarkerArray& markerArray();
-
-  boost::shared_ptr<Task> self();
+  std::shared_ptr<Task> self();
 
 private:
-  boost::weak_ptr<Task> self_;
-  boost::weak_ptr<Task> parent_task_;
+  std::weak_ptr<Task> self_;
+  std::weak_ptr<Task> parent_task_;
 
   project11_nav_msgs::TaskInformation message_;
   TaskList children_;
   ros::Time last_update_time_;
-
-  static std::shared_ptr<TaskPlugins> creator_;
-
-  visualization_msgs::MarkerArray marker_array_;
 };
+
 
 } // namespace project11_navigation
 

@@ -14,7 +14,7 @@ void TaskList::update(const std::vector<project11_nav_msgs::TaskInformation>& ta
 {
   // Create a new vector adding tasks in order they appear.
   // Existing tasks may be copied from existing vector or new ones created if needed.
-  std::vector<boost::shared_ptr<Task> > new_task_list;
+  std::vector<std::shared_ptr<Task> > new_task_list;
   // First, the direct children or top level tasks
   for(const auto& task_msg: task_msgs)
   {
@@ -22,7 +22,7 @@ void TaskList::update(const std::vector<project11_nav_msgs::TaskInformation>& ta
     // Top level or direct child id? Yes if we have a second part but not a first part.
     if(id_parts.first.empty() && !id_parts.second.empty())
     {
-      boost::shared_ptr<Task> task;
+      std::shared_ptr<Task> task;
       for(auto existing_task: tasks_)
       {
         if(existing_task->message().id == task_msg.id)
@@ -33,7 +33,7 @@ void TaskList::update(const std::vector<project11_nav_msgs::TaskInformation>& ta
       }
       if(!task)
       {
-        Task::Ptr parent;
+        TaskPtr parent;
         if(parent_task_)
           parent = parent_task_->self();
         task = Task::create(task_msg, parent);
@@ -71,7 +71,7 @@ std::pair<std::string, std::string> TaskList::splitChildID(const std::string& ta
   return ret;
 }
 
-const std::vector<boost::shared_ptr<Task> >& TaskList::tasks() const
+const std::vector<std::shared_ptr<Task> >& TaskList::tasks() const
 {
   return tasks_;
 }
@@ -90,14 +90,14 @@ std::vector<project11_nav_msgs::TaskInformation> TaskList::taskMessages() const
   return ret;
 }
 
-std::vector<boost::shared_ptr<Task> > TaskList::tasksByPriority(bool skip_done) const
+std::vector<std::shared_ptr<Task> > TaskList::tasksByPriority(bool skip_done) const
 {
-  std::map<int, std::vector<boost::shared_ptr<Task> > > priority_map;
+  std::map<int, std::vector<std::shared_ptr<Task> > > priority_map;
   for(auto t: tasks_)
     if(!skip_done || !t->done())
       priority_map[t->message().priority].push_back(t);
 
-  std::vector<boost::shared_ptr<Task> > ret;
+  std::vector<std::shared_ptr<Task> > ret;
   for(auto task_list: priority_map)
     for(auto t: task_list.second)
       ret.push_back(t);
@@ -121,13 +121,13 @@ bool TaskList::getLastPose(geometry_msgs::PoseStamped& pose, bool recursive) con
   return false;
 }
 
-boost::shared_ptr<Task> TaskList::createTaskBefore(boost::shared_ptr<Task> task, std::string type)
+std::shared_ptr<Task> TaskList::createTaskBefore(std::shared_ptr<Task> task, std::string type)
 {
   auto task_iterator = tasks_.begin();
   while(task && task_iterator != tasks_.end() && *task_iterator != task)
     task_iterator++;
   
-  boost::shared_ptr<Task> ret;
+  std::shared_ptr<Task> ret;
 
   if(!task || task_iterator != tasks_.end())
   {
@@ -136,7 +136,7 @@ boost::shared_ptr<Task> TaskList::createTaskBefore(boost::shared_ptr<Task> task,
     tm.type = type;
     if(task)
       tm.priority = task->message().priority;
-    Task::Ptr parent;
+    TaskPtr parent;
     if(parent_task_)
       parent = parent_task_->self();
     ret = Task::create(tm, parent);
@@ -145,7 +145,7 @@ boost::shared_ptr<Task> TaskList::createTaskBefore(boost::shared_ptr<Task> task,
   return ret;
 }
 
-std::string TaskList::generateUniqueID(const std::string& prefix, boost::shared_ptr<Task> skip) const
+std::string TaskList::generateUniqueID(const std::string& prefix, std::shared_ptr<Task> skip) const
 {
   std::string path;
   if(parent_task_)
@@ -183,10 +183,9 @@ bool TaskList::allDone(bool recursive) const
   return true;
 }
 
-void TaskList::getDisplayMarkers(visualization_msgs::MarkerArray& marker_array) const
+void TaskList::clear()
 {
-  for(auto t: tasks_)
-    t->getDisplayMarkers(marker_array);
+  tasks_.clear();
 }
 
 }  // namespace project11_navigation

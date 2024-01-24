@@ -1,45 +1,9 @@
-
 controller_frequency: 10.0
 
-plugins:
-  TaskToTaskWorkflow:
-    dubins: dubins_curves/Dubins
-    preview: dubins_curves/Dubins
-    dubins_planner: dubins_planner/DubinsPlanner
-  TaskToTwistWorkflow:
-    executive: project11_navigation/ExecuteTask
-    transit: project11_navigation/TaskToTwistStack
-    hover: hover/Hover
-    idle: project11_navigation/Idle
-    path_follower: path_follower/PathFollower
-    survey_line: project11_navigation/TaskToTwistStack
-  TaskListToTaskListWorkflow:
-    task_connector: project11_navigation/TaskConnector
-  TaskListToTwistWorkflow:
-    task_manager: project11_navigation/TaskManager
-  Tasks:
-    behavior: project11_navigation/BehaviorTask
-    goto: project11_navigation/GotoTask
-    hover: project11_navigation/HoverTask
-    idle: project11_navigation/IdleTask
-    survey_area: project11_navigation/SurveyAreaTask
-    survey_line: project11_navigation/SurveyLineTask
-    transit: project11_navigation/TransitTask
-
-TaskToTwistWorkflow/path_follower:
+path_follower:
   pid:
     upper_limit: 90
     lower_limit: -90
     windup_limit: 50
 
-TaskToTwistWorkflow/transit:
-  steps:
-    - dubins
-  last_step: path_follower
-
-TaskToTwistWorkflow/survey_line:
-  last_step: path_follower
-
-TaskToTaskWorkflow/preview:
-  output_task_name: preview_trajectory
 

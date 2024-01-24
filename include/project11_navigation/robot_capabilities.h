@@ -1,6 +1,7 @@
 #ifndef PROJECT11_NAVIGATION_ROBOT_CAPABILITIES_H
 #define PROJECT11_NAVIGATION_ROBOT_CAPABILITIES_H
 
+#include <ros/ros.h>
 #include <geometry_msgs/Accel.h>
 #include <geometry_msgs/Twist.h>
 #include <geometry_msgs/Point.h>
@@ -11,6 +12,8 @@ namespace project11_navigation
 /// Motion limits of a robot
 struct RobotCapabilities
 {
+  RobotCapabilities(ros::NodeHandle& nh);
+
   geometry_msgs::Twist min_velocity;
   geometry_msgs::Twist max_velocity;
   geometry_msgs::Twist default_velocity;
@@ -28,7 +31,7 @@ struct RobotCapabilities
   /// Outline in XY plane of the robot
   std::vector<geometry_msgs::Point> footprint;
 
-  /// Radius used for collison checking
+  /// Radius used for collision checking
   double radius;
 };
 

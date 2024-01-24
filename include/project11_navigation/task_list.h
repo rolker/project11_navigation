@@ -2,12 +2,17 @@
 #define PROJECT11_NAVIGATION_TASKLIST_H
 
 #include <project11_nav_msgs/TaskInformation.h>
-#include <visualization_msgs/MarkerArray.h>
 
 namespace project11_navigation
 {
 
 class Task;
+using TaskPtr = std::shared_ptr<Task>;
+using TaskConstPtr = std::shared_ptr<const Task>;
+
+class TaskList;
+using TaskListPtr = std::shared_ptr<TaskList>;
+using TaskListConstPtr = std::shared_ptr<const TaskList>;
 
 class TaskList
 {
@@ -20,14 +25,14 @@ public:
   void update(const std::vector<project11_nav_msgs::TaskInformation>& task_msgs);
 
   /// Return list of direct children tasks. 
-  const std::vector<boost::shared_ptr<Task> >& tasks() const;
+  const std::vector<std::shared_ptr<Task> >& tasks() const;
 
   /// Returns a list of TaskInformation messages, recursing 
   /// down the children. 
   std::vector<project11_nav_msgs::TaskInformation> taskMessages() const;
 
   /// Returns a list of direct children Tasks sorted by priority. 
-  std::vector<boost::shared_ptr<Task> > tasksByPriority(bool skip_done = false) const;
+  std::vector<std::shared_ptr<Task> > tasksByPriority(bool skip_done = false) const;
 
   /// Returns the first pose among direct children,
   /// optionally recursively searching (depth first).
@@ -40,7 +45,7 @@ public:
   /// Creates a new task and optionally inserts it before task.
   /// If task is not null and it is not found, no new task is created.
   /// Returns the new task or nullptr.
-  boost::shared_ptr<Task> createTaskBefore(boost::shared_ptr<Task> task, std::string type = "");
+  std::shared_ptr<Task> createTaskBefore(std::shared_ptr<Task> task, std::string type = "");
   
   /// Returns true if all tasks in the list are done,
   /// optionally recursing down the children.
@@ -52,10 +57,10 @@ public:
   /// in a unique id is used. Empty string is returned if
   /// a unique id can't be found. If a skip task is supplied
   /// allow it's id to be reused.
-  std::string generateUniqueID(const std::string &prefix, boost::shared_ptr<Task> skip = {}) const; 
+  std::string generateUniqueID(const std::string &prefix, std::shared_ptr<Task> skip = {}) const; 
 
-  void getDisplayMarkers(visualization_msgs::MarkerArray& marker_array) const;
-
+  /// Clears the tasks
+  void clear();
 private:
   /// Split the id of a potential child task into the
   /// relative path and direct child part.
@@ -65,7 +70,7 @@ private:
   /// the last component of the task id.
   std::pair<std::string, std::string> splitChildID(const std::string& task_id) const;
 
-  std::vector<boost::shared_ptr<Task> > tasks_;
+  std::vector<std::shared_ptr<Task> > tasks_;
   Task* parent_task_ = nullptr;
 };
 

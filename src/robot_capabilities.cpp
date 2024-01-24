@@ -1,7 +1,61 @@
 #include <project11_navigation/robot_capabilities.h>
+#include <project11_navigation/utilities.h>
+#include <ros/ros.h>
 
 namespace project11_navigation
 {
+
+RobotCapabilities::RobotCapabilities(ros::NodeHandle& nh)
+{
+  XmlRpc::XmlRpcValue value;
+  if(nh.getParam("robot/turn_radius", value))
+  {
+    if (value.getType() == XmlRpc::XmlRpcValue::TypeArray)
+      for(int i = 0; i < value.size(); ++i)
+        turn_radius_map[static_cast<double>(value[i]["velocity"])] = static_cast<double>(value[i]["radius"]);
+    else
+      nh.getParam("robot/turn_radius", turn_radius_map[0.0]);
+  }
+
+  readLinearAngularParameters(nh, "robot/max_velocity", max_velocity, max_velocity);
+  readLinearAngularParameters(nh, "robot/min_velocity", min_velocity, min_velocity);
+  readLinearAngularParameters(nh, "robot/default_velocity", default_velocity, default_velocity);
+
+  readLinearAngularParameters(nh, "robot/max_acceleration", max_acceleration, max_acceleration);
+  readLinearAngularParameters(nh, "robot/max_deceleration", max_deceleration, max_deceleration);
+
+  if(nh.getParam("robot/footprint", value))
+  {
+    if(value.getType() == XmlRpc::XmlRpcValue::TypeArray)
+    {
+      for(int i = 0; i < value.size(); ++i)
+      {
+        if(value[i].getType() == XmlRpc::XmlRpcValue::TypeArray && value[i].size() == 2)
+        {
+          geometry_msgs::Point p;
+          if(value[i][0].getType() == XmlRpc::XmlRpcValue::TypeDouble)
+            p.x = static_cast<double>(value[i][0]);
+          else
+            p.x = static_cast<int>(value[i][0]);
+          if(value[i][1].getType() == XmlRpc::XmlRpcValue::TypeDouble)
+            p.y = static_cast<double>(value[i][1]);
+          else
+            p.y = static_cast<int>(value[i][1]);
+          footprint.push_back(p);
+        }
+        else
+          ROS_ERROR_STREAM("Expected an array of 2 values in footprint point number " << i);
+      }
+    }
+    else
+      ROS_ERROR_STREAM("Expected an array of points for the footprint");
+    for(auto p: footprint)
+      radius = std::max(radius, sqrt(p.x*p.x + p.y*p.y));
+  }
+
+  radius = readDoubleOrIntParameter(nh, "robot/radius", radius);
+
+}
 
 double RobotCapabilities::getTurnRadiusAtSpeed(double speed) const
 {
@@ -27,5 +81,7 @@ double RobotCapabilities::getTurnRadiusAtSpeed(double speed) const
   }
   return 0.0;
 }
+
+
 
 }

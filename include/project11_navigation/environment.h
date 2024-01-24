@@ -3,6 +3,7 @@
 
 #include <ros/ros.h>
 #include <grid_map_ros/grid_map_ros.hpp>
+#include <project11_nav_msgs/RobotState.h>
 
 namespace project11_navigation
 {
@@ -24,12 +25,15 @@ public:
     std::map<double, std::vector<std::string> > static_grids_by_resolution;
 
     std::map<std::string, grid_map::GridMap> dynamic_grids;
+
+    double getCost(const project11_nav_msgs::RobotState& from_state, const project11_nav_msgs::RobotState& to_state, double robot_comfort_radius);
+
   };
 
   // Generates and returns a snapshot.
-  Snapshot snapshot(bool dynamic_only=false);
+  Snapshot snapshot(bool dynamic_only=false) const;
 
-  std::string mapFrame();
+  std::string mapFrame() const;
   
 private:
 
@@ -39,8 +43,6 @@ private:
     void subscribe(std::string topic);
 
     grid_map::GridMap grid_map;
-    std::mutex grid_map_mutex;
-
     ros::Subscriber subscriber;
   };
 

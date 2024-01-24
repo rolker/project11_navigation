@@ -3,41 +3,54 @@
 
 #include <ros/ros.h>
 #include <project11_nav_msgs/TaskInformation.h>
+#include <actionlib/server/simple_action_server.h>
+#include <project11_navigation/RunTasksAction.h>
+
 #include <project11_navigation/context.h>
-#include <project11_navigation/interfaces/tasklist_to_twist_workflow.h>
+#include <project11_navigation/task_list.h>
+
+#include <behaviortree_cpp/bt_factory.h>
+#include <behaviortree_cpp/loggers/groot2_publisher.h>
+#include <behaviortree_cpp/loggers/bt_file_logger_v2.h>
+#include <behaviortree_cpp/loggers/bt_cout_logger.h>
+#include <behaviortree_cpp/loggers/bt_sqlite_logger.h>
 
 namespace project11_navigation
 {
 
-/// Executive that accepts tasks and executes them.
+/// Action server that accepts tasks and executes them.
 class Navigator
 {
 public:
-  Navigator();
+  Navigator(std::string name = "navigator");
   ~Navigator();
 
-protected:
-  void updateTasks(const std::vector<project11_nav_msgs::TaskInformation>& tasks);
-  virtual void done();
-  virtual void iterate(const ros::TimerEvent& event);
-
-  std::shared_ptr<TaskList> task_list_;
-  std::shared_ptr<Context> context_;
 private:
-  ros::NodeHandle nodeHandle_;
-  
-  ros::Timer iterate_timer_;
+  void goalCallback();
+  void preemptCallback();
 
-  std::shared_ptr<Robot> robot_;
+  void odometryCallback(const nav_msgs::Odometry::ConstPtr& msg);
 
-  double controller_frequency_ = 10.0;
+  /// Builds and returns the Behavior Tree
+  BT::Tree buildBehaviorTree();
 
-  boost::shared_ptr<TaskListToTwistWorkflow> task_manager_;
+  ros::NodeHandle node_handle_;
 
-  // Task list as provided by the user
-  std::vector<project11_nav_msgs::TaskInformation> task_messages_;
+  actionlib::SimpleActionServer<project11_navigation::RunTasksAction> action_server_;
+
+  std::shared_ptr<Context> context_;
+
+  ros::Subscriber odom_sub_;
 
   ros::Publisher display_pub_;
+
+  BT::Tree tree_;
+  BT::Blackboard::Ptr blackboard_;
+
+  std::shared_ptr<BT::Groot2Publisher> groot_;
+  std::shared_ptr<BT::FileLogger2> logger_;
+  std::shared_ptr<BT::SqliteLogger> sqlite_logger_;
+  std::shared_ptr<BT::StdCoutLogger> console_logger_;
 };
 
 } // namespace project11_navigation

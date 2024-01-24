@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root BTCPP_format="4" project_name="project11_navigation">
+    <include path="../../hover/behavior_trees/hover.xml"/>
+    <include path="navigator.xml"/>
+    <!-- Description of Node Models (used by Groot) -->
+    <TreeNodesModel>
+        <Condition ID="AllTasksDoneCondition" editable="true">
+            <input_port name="task_list" default="{task_list}"/>
+        </Condition>
+        <Action ID="BaxevaniController" editable="true">
+            <input_port name="navigation_path" default="{navigation_path}"/>
+            <input_port name="current_navigation_segment" default="{current_navigation_segment}"/>
+            <input_port name="odometry" default="{odometry}"/>
+            <input_port name="tf_buffer" default="{tf_buffer}"/>
+            <input_port name="target_speed" default="{target_speed}"/>
+            <input_port name="ricatti_parameter" default="1.8752285"/>
+            <input_port name="px_gain" default="100.78"/>
+            <input_port name="pw_gain" default="20.055"/>
+            <input_port name="delta" default="0.1">Distance of the (sonar) sensor from the center of mass/position of imu</input_port>
+            <input_port name="maximum_dt" default="0.5"/>
+        </Action>
+        <Action ID="CCOMPlanner" editable="true">
+            <input_port name="start_pose" default="{start_pose}"/>
+            <input_port name="goal_pose" default="{goal_pose}"/>
+            <output_port name="navigation_path" default="{navigation_path}"/>
+            <input_port name="robot_capabilities" default="{robot_capabilities}"/>
+            <input_port name="tf_buffer" default="{tf_buffer}"/>
+            <input_port name="context" default="{context}"/>
+        </Action>
+        <Action ID="CrabbingPathFollower" editable="true">
+            <output_port name="command_velocity" default="{command_velocity}"/>
+            <input_port name="navigation_path" default="{navigation_path}"/>
+            <input_port name="tf_buffer" default="{tf_buffer}"/>
+            <inout_port name="pid" default="{path_follower_pid}"/>
+            <input_port name="odometry" default="{odometry}"/>
+            <input_port name="current_navigation_segment" default="{current_navigation_segment}"/>
+            <input_port name="target_speed" default="{target_speed}"/>
+        </Action>
+        <Action ID="DebugBlackboard" editable="true">
+            <input_port name="value"/>
+        </Action>
+        <Action ID="GeneratePlan" editable="true">
+            <input_port name="start_pose" default="{current_pose}"/>
+            <input_port name="goal_pose" default="{goal_pose}"/>
+            <input_port name="planner" default="{default_planner}"/>
+            <output_port name="navigation_trajectory" default="{navigation_trajectory}"/>
+            <input_port name="robot_capabilities" default="{robot_capabilities}"/>
+            <output_port name="current_navigation_segment" default="{current_navigation_segment}">Index of the current segment of the navigation trajectory</output_port>
+        </Action>
+        <Action ID="GetSubTasks" editable="true">
+            <input_port name="task" default="{current_task}"/>
+            <output_port name="sub_tasks" default="{current_sub_tasks}"/>
+        </Action>
+        <Action ID="GetTaskDataDouble" editable="true">
+            <input_port name="task" default="{task}"/>
+            <input_port name="key"/>
+            <input_port name="default_value"/>
+            <output_port name="value"/>
+        </Action>
+        <Action ID="GetTaskDataString" editable="true">
+            <input_port name="task" default="{task}"/>
+            <input_port name="key"/>
+            <input_port name="default_value"/>
+            <output_port name="value"/>
+        </Action>
+        <Condition ID="GoalReachedCondition" editable="true">
+            <input_port name="odometry" default="{odometry}"/>
+            <input_port name="goal_pose" default="{goal_pose}"/>
+            <input_port name="waypoint_reached_distance" default="{waypoint_reached_distance}"/>
+            <input_port name="heading_accuracy" default="180">How much can the heading can vary. 180 means it doesn't matter.</input_port>
+        </Condition>
+        <Action ID="HoverCommand" editable="true">
+            <inout_port name="command_velocity" default="{command_velocity}"/>
+            <input_port name="minimum_distance" default="{hover_minimum_distance}">Distance from target where command speed drops to zero</input_port>
+            <input_port name="maximum_distance" default="{hover_maximum_distance}">Distance from target where command speed reaches max hover speed</input_port>
+            <input_port name="maximum_speed" default="{hover_maximum_speed}">Maximum speed used to move towards target position</input_port>
+            <input_port name="tf_buffer" default="{tf_buffer}"/>
+            <input_port name="goal_pose" default="{goal_pose}"/>
+        </Action>
+        <Action ID="HoverSettingsLoader" editable="true">
+            <output_port name="minimum_distance" default="{hover_minimum_distance}">Distance from target where command speed drops to zero</output_port>
+            <output_port name="maximum_distance" default="{hover_maximum_distance}">Distance from target where command speed reaches max hover speed</output_port>
+            <output_port name="maximum_speed" default="{hover_maximum_speed}">Maximum speed used to move towards target position</output_port>
+            <output_port name="transit_distance" default="{hover_transit_distance}">Distance from goal at which a transit is needed to return to hover area</output_port>
+        </Action>
+        <Action ID="HoverUpdate" editable="true">
+            <input_port name="current_task" default="{current_task}"/>
+            <output_port name="goal_pose" default="{goal_pose}"/>
+            <input_port name="current_pose" default="{current_pose}"/>
+            <input_port name="marker_array" default="{marker_array}"/>
+            <input_port name="maximum_distance" default="{hover_maximum_distance}"/>
+        </Action>
+        <Action ID="NavigatorSettingsLoader" editable="true">
+            <output_port name="waypoint_reached_distance" default="{waypoint_reached_distance}">Distance in meters within which a waypoint is deemed reached</output_port>
+            <output_port name="survey_lead_in_distance" default="{survey_lead_in_distance}">Distance in meters to extend the start of a survey line to allow heading to settle</output_port>
+            <output_port name="maximum_cross_track_error" default="{maximum_cross_track_error}"/>
+        </Action>
+        <Condition ID="PlanNeededCondition" editable="true">
+            <input_port name="navigation_trajectory" default="{navigation_trajectory}">Current navigation plan or empty</input_port>
+            <input_port name="goal_pose" default="{goal_pose}"/>
+            <input_port name="maximum_cross_track_error" default="{maximum_cross_track_error}">Distance at which to be considered off-track for the purpose of needing to replan.</input_port>
+            <input_port name="cross_track_error" default="{cross_track_error}"/>
+        </Condition>
+        <Action ID="RobotCapabilitiesLoader" editable="true">
+            <output_port name="robot_capabilities" default="{robot_capabilities}">Pointer to a RobotCapabilities structure</output_port>
+            <output_port name="default_target_speed" default="{default_target_speed}">Default forward speed in m/s</output_port>
+        </Action>
+        <Action ID="SetPoseFromTask" editable="true">
+            <input_port name="task" default="{current_task}"/>
+            <input_port name="pose_index" default="0">Index of the pose to set as output pose</input_port>
+            <output_port name="pose" default="{goal_pose}"/>
+        </Action>
+        <Action ID="SetTaskDone" editable="true">
+            <input_port name="task" default="{task}"/>
+        </Action>
+        <Action ID="SetTrajectoryFromTask" editable="true">
+            <input_port name="task" default="{current_task}"/>
+            <output_port name="trajectory" default="{current_navigation_trajectory}"/>
+            <output_port name="current_segment" default="{current_segment}"/>
+        </Action>
+        <Action ID="TaskListUpdater" editable="true">
+            <inout_port name="task_messages" default="{task_messages}">Pointer to a vector of new TaskInformation messages</inout_port>
+            <inout_port name="task_list" default="{task_list}">Pointer to the TaskList</inout_port>
+        </Action>
+        <Action ID="UpdateCurrentSegment" editable="true">
+            <input_port name="navigation_path" default="{navigation_path}"/>
+            <input_port name="odometry" default="{odometry}"/>
+            <input_port name="tf_buffer" default="{tf_buffer}"/>
+            <inout_port name="current_segment" default="{current_navigation_segment}"/>
+            <output_port name="segment_length" default="{current_segment_length}"/>
+            <output_port name="cross_track_error" default="{current_segment_cross_track_error}"/>
+            <output_port name="along_track_progress" default="{current_segment_along_track_progress}"/>
+            <output_port name="segment_count" default="{navigation_path_segment_count}"/>
+        </Action>
+        <Action ID="UpdateCurrentTask" editable="true">
+            <input_port name="task_list" default="{task_list}"/>
+            <output_port name="current_task" default="{current_task}"/>
+            <output_port name="current_task_type" default="{current_task_type}"/>
+            <output_port name="current_task_id" default="{current_task_id}"/>
+        </Action>
+        <Action ID="UpdateState" editable="true">
+            <output_port name="piloting_mode" default="{piloting_mode}">Current Project11 piloting mode</output_port>
+            <output_port name="base_frame" default="{base_frame}">Robot's base frame_id for use with cmd_vel</output_port>
+            <output_port name="odometry" default="{odometry}">Robot's latest position and attitude</output_port>
+            <output_port name="current_pose" default="{current_pose}">Robot's latest pose</output_port>
+            <output_port name="command_velocity" default="{command_velocity}">Initial command set to 0</output_port>
+            <output_port name="tf_buffer" default="{tf_buffer}">tf2 Transformation Buffer</output_port>
+            <output_port name="marker_array" default="{marker_array}">Pointer to a visualization marker array</output_port>
+            <input_port name="robot_capabilities" default="{robot_capabilities}"/>
+            <input_port name="context" default="{context}"/>
+        </Action>
+        <Action ID="VisualizeTrajectory" editable="true">
+            <input_port name="trajectory" default="{navigation_trajectory}">Pointer to a vector of PoseStamped</input_port>
+            <inout_port name="marker_array" default="{marker_array}">Pointer to a MarkerArray</inout_port>
+            <input_port name="namespace" default="trajectory">Used in ns field of Markers</input_port>
+            <input_port name="scale" default="1.0">Display size</input_port>
+            <input_port name="past_color" default=".25, .25, .25, .5">Color for past segments</input_port>
+            <input_port name="current_color" default=".35, .35, .5, .75">Color for current segment</input_port>
+            <input_port name="future_color" default=".25, .25, .4, .5">Color for future segments</input_port>
+            <input_port name="current_segment" default="{current_navigation_segment}">Index of the current segment</input_port>
+            <input_port name="current_pose" default="{current_pose}"/>
+        </Action>
+    </TreeNodesModel>
+</root>

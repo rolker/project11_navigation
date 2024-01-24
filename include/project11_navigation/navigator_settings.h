@@ -4,7 +4,7 @@
 namespace project11_navigation
 {
 
-/// Motion limits of a robot
+/// Parameters used for navigation
 struct NavigatorSettings
 {
   /// Distance in meters within which a waypoint is deemed reached
