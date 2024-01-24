@@ -28,7 +28,7 @@ generate_messages(DEPENDENCIES actionlib_msgs project11_nav_msgs)
 
 catkin_package(
   INCLUDE_DIRS include
-  LIBRARIES project11_navigation project11_navigation_plugins
+  LIBRARIES project11_navigation
   CATKIN_DEPENDS actionlib actionlib_msgs behaviortree_cpp costmap_2d dubins_curves geometry_msgs grid_map_ros nav_core pluginlib project11_nav_msgs roscpp rospy tf2 visualization_msgs yaml-cpp
 #  DEPENDS system_lib
 )
@@ -96,6 +96,7 @@ set(BT_PLUGIN_SOURCES
 add_library(project11_navigation_bt_plugins SHARED ${BT_PLUGIN_SOURCES})
 target_link_libraries(project11_navigation_bt_plugins PRIVATE ${BTCPP_LIBRARY} ${catkin_LIBRARIES})
 target_compile_definitions(project11_navigation_bt_plugins PRIVATE  BT_PLUGIN_EXPORT )
+add_dependencies(project11_navigation_bt_plugins ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 install(TARGETS navigator project11_navigation  project11_navigation_bt_plugins
    ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
