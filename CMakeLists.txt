@@ -77,7 +77,9 @@ set(BT_PLUGIN_SOURCES
   src/actions/get_task_data_double.cpp
   src/actions/get_task_data_string.cpp
   src/actions/get_sub_tasks.cpp
+  src/actions/hover.cpp
   src/actions/navigator_settings_loader.cpp
+  src/actions/predict_stopping_pose.cpp
   src/actions/robot_capabilities_loader.cpp
   src/actions/set_pose_from_task.cpp
   src/actions/set_task_done.cpp

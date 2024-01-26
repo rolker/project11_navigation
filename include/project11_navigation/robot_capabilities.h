@@ -4,7 +4,7 @@
 #include <ros/ros.h>
 #include <geometry_msgs/Accel.h>
 #include <geometry_msgs/Twist.h>
-#include <geometry_msgs/Point.h>
+#include <geometry_msgs/Polygon.h>
 
 namespace project11_navigation
 {
@@ -16,10 +16,22 @@ struct RobotCapabilities
 
   geometry_msgs::Twist min_velocity;
   geometry_msgs::Twist max_velocity;
+
+  /// default cruise speed
   geometry_msgs::Twist default_velocity;
 
+  /// Max available acceleration
   geometry_msgs::Accel max_acceleration;
+
+  /// Default acceleration that should be used
+  /// for normal operations
+  geometry_msgs::Accel default_acceleration;
+
+  /// Powered deceleration
   geometry_msgs::Accel max_deceleration;
+
+  /// Drifting deceleration
+  geometry_msgs::Accel default_deceleration;
 
   /// Map speed to turn radius for a Dubin's robot.
   /// If empty, robot can turn in place so radius is 0.
@@ -29,10 +41,11 @@ struct RobotCapabilities
   double getTurnRadiusAtSpeed(double speed) const;
 
   /// Outline in XY plane of the robot
-  std::vector<geometry_msgs::Point> footprint;
+  //std::vector<geometry_msgs::Point> footprint;
+  geometry_msgs::Polygon footprint;
 
   /// Radius used for collision checking
-  double radius;
+  float radius;
 };
 
 }

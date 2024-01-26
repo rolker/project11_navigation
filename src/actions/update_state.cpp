@@ -24,7 +24,7 @@ BT::PortsList UpdateState::providedPorts()
     BT::OutputPort<geometry_msgs::TwistStamped>("command_velocity"),
     BT::OutputPort<std::shared_ptr<tf2_ros::Buffer> >("tf_buffer"),
     BT::OutputPort<std::shared_ptr<visualization_msgs::MarkerArray> >("marker_array"),
-    BT::InputPort<std::shared_ptr<RobotCapabilities> >("robot_capabilities")
+    BT::InputPort<geometry_msgs::Polygon>("robot_footprint")
   };
 }
 
@@ -49,10 +49,10 @@ BT::NodeStatus UpdateState::tick()
   setOutput("tf_buffer", context.value()->tfBuffer());
 
   auto marker_array = std::make_shared<visualization_msgs::MarkerArray>();
-  auto caps = getInput<std::shared_ptr<RobotCapabilities> >("robot_capabilities");
-  if(caps && caps.value())
+  auto footprint = getInput<geometry_msgs::Polygon>("robot_footprint");
+  if(footprint)
   {
-    context.value()->robot().updateMarkers(*marker_array, *caps.value());
+    context.value()->robot().updateMarkers(*marker_array, footprint.value());
   }
   setOutput("marker_array", marker_array);
 

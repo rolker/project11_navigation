@@ -5,6 +5,7 @@
 #include <std_msgs/Bool.h>
 #include <geometry_msgs/TwistStamped.h>
 #include <visualization_msgs/MarkerArray.h>
+#include <geometry_msgs/Polygon.h>
 
 namespace project11_navigation
 {
@@ -19,9 +20,9 @@ public:
   /// Sends command to robot if enabled.
   void sendControls(const geometry_msgs::TwistStamped& cmd_vel) const;
 
-  /// Draws robot footprint suing visualization markers
+  /// Draws robot footprint using visualization markers
   ///  \todo move to a BT Action with access to footprint
-  void updateMarkers(visualization_msgs::MarkerArray& marker_array, const RobotCapabilities &robot_capabilities) const;
+  void updateMarkers(visualization_msgs::MarkerArray& marker_array, const geometry_msgs::Polygon& footprint) const;
 
   
   /// Returns true if robot can accept drive commands.

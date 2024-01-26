@@ -22,7 +22,10 @@ RobotCapabilities::RobotCapabilities(ros::NodeHandle& nh)
   readLinearAngularParameters(nh, "robot/default_velocity", default_velocity, default_velocity);
 
   readLinearAngularParameters(nh, "robot/max_acceleration", max_acceleration, max_acceleration);
+  readLinearAngularParameters(nh, "robot/default_acceleration", default_acceleration, default_acceleration);
+
   readLinearAngularParameters(nh, "robot/max_deceleration", max_deceleration, max_deceleration);
+  readLinearAngularParameters(nh, "robot/default_deceleration", default_deceleration, default_deceleration);
 
   if(nh.getParam("robot/footprint", value))
   {
@@ -32,7 +35,7 @@ RobotCapabilities::RobotCapabilities(ros::NodeHandle& nh)
       {
         if(value[i].getType() == XmlRpc::XmlRpcValue::TypeArray && value[i].size() == 2)
         {
-          geometry_msgs::Point p;
+          geometry_msgs::Point32 p;
           if(value[i][0].getType() == XmlRpc::XmlRpcValue::TypeDouble)
             p.x = static_cast<double>(value[i][0]);
           else
@@ -41,7 +44,7 @@ RobotCapabilities::RobotCapabilities(ros::NodeHandle& nh)
             p.y = static_cast<double>(value[i][1]);
           else
             p.y = static_cast<int>(value[i][1]);
-          footprint.push_back(p);
+          footprint.points.push_back(p);
         }
         else
           ROS_ERROR_STREAM("Expected an array of 2 values in footprint point number " << i);
@@ -49,7 +52,7 @@ RobotCapabilities::RobotCapabilities(ros::NodeHandle& nh)
     }
     else
       ROS_ERROR_STREAM("Expected an array of points for the footprint");
-    for(auto p: footprint)
+    for(auto p: footprint.points)
       radius = std::max(radius, sqrt(p.x*p.x + p.y*p.y));
   }
 

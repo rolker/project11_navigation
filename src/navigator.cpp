@@ -39,7 +39,9 @@ Navigator::Navigator(std::string name):
   if(!log_file.empty())
     logger_ = std::make_shared<BT::FileLogger2>(tree_, log_file);
 
-  //console_logger_ = std::make_shared<BT::StdCoutLogger>(tree_);
+  bool debug = private_nh.param<bool>("debug",false);
+  if(debug)
+    console_logger_ = std::make_shared<BT::StdCoutLogger>(tree_);
 
   action_server_.registerGoalCallback(std::bind(&Navigator::goalCallback, this));
   action_server_.registerPreemptCallback(std::bind(&Navigator::preemptCallback, this));
@@ -62,7 +64,7 @@ BT::Tree Navigator::buildBehaviorTree()
 
   /// \todo Allow extra directories from param server
 
-  std::vector<std::string> packages = {"project11_navigation", "hover"};
+  std::vector<std::string> packages = {"project11_navigation"};
 
   for (auto package: packages)
   {

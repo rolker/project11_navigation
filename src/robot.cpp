@@ -28,7 +28,7 @@ void Robot::enableCallback(const std_msgs::BoolConstPtr& msg)
   enabled_ = msg->data;
 }
 
-void Robot::updateMarkers(visualization_msgs::MarkerArray& marker_array, const RobotCapabilities& robot_capabilities) const
+void Robot::updateMarkers(visualization_msgs::MarkerArray& marker_array, const geometry_msgs::Polygon& footprint) const
 {
   visualization_msgs::Marker marker;
   marker.header.frame_id = odom_.header.frame_id;
@@ -43,9 +43,13 @@ void Robot::updateMarkers(visualization_msgs::MarkerArray& marker_array, const R
   marker.color.b = .25;
   marker.color.a = 1.0;
   marker.scale.x = 0.2;
-  for(auto p: robot_capabilities.footprint)
+  for(auto p: footprint.points)
   {
-    marker.points.push_back(p);
+    geometry_msgs::Point marker_point;
+    marker_point.x = p.x;
+    marker_point.y = p.y;
+    marker_point.z = p.z;
+    marker.points.push_back(marker_point);
   }
   marker_array.markers.push_back(marker);
 
