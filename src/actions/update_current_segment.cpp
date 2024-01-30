@@ -4,6 +4,7 @@
 #include <nav_msgs/Odometry.h>
 #include <tf2_ros/buffer.h>
 #include "project11/utils.h"
+#include <std_msgs/Float32.h>
 
 namespace project11_navigation
 {
@@ -11,7 +12,8 @@ namespace project11_navigation
 UpdateCurrentSegment::UpdateCurrentSegment(const std::string& name, const BT::NodeConfig& config):
   BT::SyncActionNode(name, config)
 {
-
+  ros::NodeHandle nh("~");
+  cross_track_error_publisher_ = nh.advertise<std_msgs::Float32>("cross_track_error", 1);
 }
 
 BT::PortsList UpdateCurrentSegment::providedPorts()
@@ -128,6 +130,9 @@ BT::NodeStatus UpdateCurrentSegment::tick()
   setOutput("current_segment", current_segment);
   setOutput("segment_length", segment_length);
   setOutput("cross_track_error", cross_track_error);
+  std_msgs::Float32 cte_msg;
+  cte_msg.data = cross_track_error;
+  cross_track_error_publisher_.publish(cte_msg);
   setOutput("along_track_progress", along_track_progress);
   
   return BT::NodeStatus::SUCCESS;

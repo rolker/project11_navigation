@@ -84,6 +84,10 @@ BT::NodeStatus Hover::tick()
     project11::AngleRadiansZeroCentered current_bearing = atan2(target_local.y, target_local.x);
 
     auto current_target_speed = 0.0;
+
+    double turn_effort = current_range/maximum_distance.value();
+    turn_effort = std::min(0.5, turn_effort);
+
     if (current_range >= maximum_distance.value())
       current_target_speed = maximum_speed.value();
     else if (current_range > minimum_distance.value())
@@ -96,7 +100,9 @@ BT::NodeStatus Hover::tick()
       // in the zero speed zone so don't turn towards target if it's behind us
       if(abs(current_bearing.value()) > M_PI/2.0)
         current_bearing += M_PI;
+      turn_effort*= 0.2;
     }
+    
 
     ROS_DEBUG_STREAM("bearing: " << current_bearing.value() << " range: " << current_range << " target speed: " << current_target_speed << " max speed: " << maximum_speed.value());
 
@@ -104,7 +110,7 @@ BT::NodeStatus Hover::tick()
     cmd_vel.header.stamp = odom.value().header.stamp;
     cmd_vel.header.frame_id = odom.value().child_frame_id;
 
-    cmd_vel.twist.angular.z = current_bearing.value();
+    cmd_vel.twist.angular.z = current_bearing.value()*turn_effort;
     cmd_vel.twist.linear.x = current_target_speed;
     setOutput("command_velocity", cmd_vel);
 
@@ -130,6 +136,26 @@ BT::NodeStatus Hover::tick()
       marker.scale.z = 0.01;
       marker.lifetime = ros::Duration(2.0);
       marker_array.value()->markers.push_back(marker);
+
+      visualization_msgs::Marker inmarker;
+      inmarker.header.frame_id = target.header.frame_id;
+      inmarker.header.stamp = odom.value().header.stamp;
+      inmarker.id = 1;
+      inmarker.ns = "hover";
+      inmarker.action = visualization_msgs::Marker::ADD;
+      inmarker.type = visualization_msgs::Marker::SPHERE;
+      inmarker.pose.position =  target.pose.position;
+      inmarker.pose.orientation.w = 1.0;
+      inmarker.color.r = 0.0;
+      inmarker.color.g = 1.0;
+      inmarker.color.b = 0.2;
+      inmarker.color.a = .75;
+      inmarker.scale.x =  2.0*minimum_distance.value();
+      inmarker.scale.y = 2.0*minimum_distance.value();
+      inmarker.scale.z = 0.01;
+      inmarker.lifetime = ros::Duration(2.0);
+      marker_array.value()->markers.push_back(inmarker);
+
     }
 
 

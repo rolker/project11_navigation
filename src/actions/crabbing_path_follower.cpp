@@ -6,6 +6,7 @@
 #include "project11/pid.h"
 #include <tf2_ros/buffer.h>
 #include <nav_msgs/Odometry.h>
+#include <std_msgs/Float32.h>
 
 namespace project11_navigation
 {
@@ -13,7 +14,8 @@ namespace project11_navigation
 CrabbingPathFollower::CrabbingPathFollower(const std::string& name, const BT::NodeConfig& config):
   BT::StatefulActionNode(name, config)
 {
-
+  ros::NodeHandle nh("~");
+  crab_angle_publisher_ = nh.advertise<std_msgs::Float32>("crab_angle", 1);
 }
 
 BT::PortsList CrabbingPathFollower::providedPorts()
@@ -127,6 +129,10 @@ BT::NodeStatus CrabbingPathFollower::onRunning()
   auto cross_track_error = vehicle_distance*sin_error_azimuth;
   auto crab_angle = project11::AngleDegrees(pid->update(cross_track_error, odom.value().header.stamp));
   project11::AngleRadians heading = tf2::getYaw(base_to_map.transform.rotation);
+
+  std_msgs::Float32 crab_angle_msg;
+  crab_angle_msg.data = crab_angle.value();
+  crab_angle_publisher_.publish(crab_angle_msg);
 
   project11::AngleRadians target_heading = segment_azimuth +	crab_angle;
 
