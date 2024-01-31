@@ -87,22 +87,22 @@ BT::NodeStatus BaxevaniController::onRunning()
     throw BT::RuntimeError(name(), " missing required input [ricatti_parameter]: ", ricatti_parameter.error() );
   }
 
-  auto px_gain = getInput<double>("px_gain");
-  if(!px_gain)
+  auto px_gain_bb = getInput<double>("px_gain");
+  if(!px_gain_bb)
   {
-    throw BT::RuntimeError(name(), " missing required input [px_gain]: ", px_gain.error() );
+    throw BT::RuntimeError(name(), " missing required input [px_gain]: ", px_gain_bb.error() );
   }
 
-  auto pw_gain = getInput<double>("pw_gain");
-  if(!pw_gain)
+  auto pw_gain_bb = getInput<double>("pw_gain");
+  if(!pw_gain_bb)
   {
-    throw BT::RuntimeError(name(), " missing required input [pw_gain]: ", pw_gain.error() );
+    throw BT::RuntimeError(name(), " missing required input [pw_gain]: ", pw_gain_bb.error() );
   }
 
-  auto delta = getInput<double>("delta");
-  if(!delta)
+  auto delta_bb = getInput<double>("delta");
+  if(!delta_bb)
   {
-    throw BT::RuntimeError(name(), " missing required input [delta]: ", delta.error() );
+    throw BT::RuntimeError(name(), " missing required input [delta]: ", delta_bb.error() );
   }
 
   auto maximum_dt = getInput<double>("maximum_dt");
@@ -159,35 +159,49 @@ BT::NodeStatus BaxevaniController::onRunning()
   cmd_vel.header.stamp = odom.value().header.stamp;
   cmd_vel.header.frame_id = odom.value().child_frame_id;
 
-  auto dt = odom.value().header.stamp - last_odom_.header.stamp;
-  if(dt.toSec() <= maximum_dt.value())
+  auto dt = (odom.value().header.stamp - last_odom_.header.stamp).toSec();
+  if(dt <= maximum_dt.value() && dt > 0.0)
   {
-    double r = ricatti_parameter.value();
     auto twist = odom.value().twist.twist;
+
+    double sensor_velx = twist.linear.x;
+    double sensor_vely = twist.linear.y;
+    double sensor_velw = twist.angular.z;
+
+    auto last_twist = last_odom_.twist.twist;
+
+    double prev_sensor_velx = last_twist.linear.x;
+    double prev_sensor_vely = last_twist.linear.y;
+    double prev_sensor_velw = last_twist.angular.z;
+
+    double current_y = cross_track_error;
+
+    double r = ricatti_parameter.value();
+    double px_gain = px_gain_bb.value();
+    double pw_gain = pw_gain_bb.value();
+    
     double v_d = target_speed;
+    double delta = delta_bb.value();
 
-    double acc_x = (twist.linear.x - last_odom_.twist.twist.linear.x) / dt.toSec(); //Acceleration on the surge axis
-    double acc_y = (twist.linear.y - last_odom_.twist.twist.linear.y) / dt.toSec(); //Acceleration on the sway axis
-    double acc_w = (twist.angular.z - last_odom_.twist.twist.angular.z) / dt.toSec(); //Acceleration on the sway axis
+    double acc_x = (sensor_velx - prev_sensor_velx) / dt; //Acceleration on the surge axis
+    double acc_y = (sensor_vely - prev_sensor_vely) / dt; //Acceleration on the sway axis
+    double acc_w = (sensor_velw - prev_sensor_velw) / dt; //Acceleration on the sway axis
 
-    double u = -(cross_track_error + delta.value() * sin(theta)) /
-      sqrt(r) - (twist.linear.x * sin(-theta)
-      + (twist.linear.y + delta.value() * twist.angular.z)
-      * cos(-theta)) * sqrt(2.0) / pow(r, (1.0 / 4.0)); // Optimal feedback law for the system
+    double u = -(current_y + delta * sin(theta)) / sqrt(r) -
+        (sensor_velx * sin(-theta) + (sensor_vely + delta * sensor_velw)
+         * cos(-theta)) * sqrt(2.0) / pow(r, (1.0 / 4.0)); // Optimal feedback law for the system
 
-    double a = 1 / r * (v_d - twist.linear.x) * cos(theta) - u * sin(theta) +
-      delta.value() * pow(twist.angular.z, 2.0) + (pow(sin(heading), 2.0) -
-      pow(cos(heading), 2.0)) * twist.linear.y *twist.angular.z; // Linear acceleration on the x axis (axis of motion)
+    double a = 1 / r * (v_d - sensor_velx) * cos(theta) - u * sin(theta) +
+        delta * pow(sensor_velw, 2.0) + (pow(sin(heading), 2.0) -
+        pow(cos(heading), 2.0)) * sensor_vely * sensor_velw; // Linear acceleration on the x axis (axis of motion)
 
-    double alpha = 1 / (r * delta.value()) * (v_d - twist.linear.x) * sin(theta) + u *
-      cos(theta) / delta.value() - twist.linear.x * twist.angular.z / delta.value() -
-      1 / delta.value() * acc_y + 2 * cos(heading) * sin(heading) * twist.linear.y
-      * twist.angular.z / delta.value(); // Angular acceleration around z axis
+    double alpha = 1 / (r * delta) * (v_d - sensor_velx) * sin(theta) + u * 
+        cos(theta) / delta - sensor_velx * sensor_velw / delta - 1 / delta *
+        acc_y + 2 * cos(heading) * sin(heading) * sensor_vely * sensor_velw / delta; // Angular acceleration around z axis
 
-    cmd_vel.twist.linear.x = 1*(last_odom_.twist.twist.linear.x + acc_x*dt.toSec() + px_gain.value()
-      *(a-acc_x)*pow(dt.toSec(),2.0));
+    cmd_vel.twist.linear.x = 1*(prev_sensor_velx + acc_x*dt + px_gain*(a-acc_x)*pow(dt,2.0));
     cmd_vel.twist.linear.y = 0.0;
-    cmd_vel.twist.angular.z = 1*(last_odom_.twist.twist.angular.z + acc_w*dt.toSec() + pw_gain.value()*(alpha-acc_w)*pow(dt.toSec(),2.0));    
+    cmd_vel.twist.angular.z = 1*(prev_sensor_velw + acc_w*dt + pw_gain*(alpha-acc_w)*pow(dt,2.0));
 
   }
 
