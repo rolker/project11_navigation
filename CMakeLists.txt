@@ -26,6 +26,7 @@ catkin_python_setup()
 add_action_files(DIRECTORY action FILES RunTasks.action)
 generate_messages(DEPENDENCIES actionlib_msgs project11_nav_msgs)
 
+
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES project11_navigation
@@ -100,7 +101,16 @@ target_link_libraries(project11_navigation_bt_plugins PRIVATE ${BTCPP_LIBRARY} $
 target_compile_definitions(project11_navigation_bt_plugins PRIVATE  BT_PLUGIN_EXPORT )
 add_dependencies(project11_navigation_bt_plugins ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
-install(TARGETS navigator project11_navigation  project11_navigation_bt_plugins
+
+add_executable(occupancy_vector_map_from_geo src/tools/occupancy_vector_map_from_geo.cpp)
+target_link_libraries(occupancy_vector_map_from_geo ${catkin_LIBRARIES})
+add_dependencies(occupancy_vector_map_from_geo ${catkin_EXPORTED_TARGETS})
+
+add_executable(occupancy_grid_from_vector_map src/tools/occupancy_grid_from_vector_map.cpp)
+target_link_libraries(occupancy_grid_from_vector_map ${catkin_LIBRARIES})
+add_dependencies(occupancy_grid_from_vector_map ${catkin_EXPORTED_TARGETS})
+
+install(TARGETS navigator project11_navigation  project11_navigation_bt_plugins occupancy_vector_map_from_geo occupancy_grid_from_vector_map
    ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
    LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
    RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
