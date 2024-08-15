@@ -34,7 +34,9 @@ Navigator::Navigator(std::string name):
   
   BT::printTreeRecursively(tree_.rootNode());
 
-  groot_ = std::make_shared<BT::Groot2Publisher>(tree_);
+  auto groot_port = private_nh.param<int>("groot2_port", 1667);
+
+  groot_ = std::make_shared<BT::Groot2Publisher>(tree_, groot_port);
 
   std::string log_file = private_nh.param("log_file", std::string()); 
 
