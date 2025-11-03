@@ -130,28 +130,96 @@ target_include_directories(project11_navigation_bt_plugins
   "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>"
 )
 
+# target_link_libraries(project11_navigation_bt_plugins
+#   project11::project11
+#   project11_navigation
+# )
+
 target_link_libraries(project11_navigation_bt_plugins
+  PUBLIC
   project11::project11
   project11_navigation
+  ${nav_msgs_TARGETS}
+  ${project11_msgs_TARGETS}
+  ${project11_nav_msgs_TARGETS}
+  ${visualization_msgs_TARGETS}
+  behaviortree_cpp::behaviortree_cpp
+  dubins_curves::dubins_curves
+  nav2_behavior_tree::nav2_append_goal_pose_to_goals_action_bt_node
+  nav2_behavior_tree::nav2_are_error_codes_active_condition_bt_node
+  nav2_behavior_tree::nav2_are_poses_near_condition_bt_node
+  nav2_behavior_tree::nav2_assisted_teleop_action_bt_node
+  nav2_behavior_tree::nav2_assisted_teleop_cancel_bt_node
+  nav2_behavior_tree::nav2_back_up_action_bt_node
+  nav2_behavior_tree::nav2_back_up_cancel_bt_node
+  nav2_behavior_tree::nav2_behavior_tree
+  nav2_behavior_tree::nav2_clear_costmap_service_bt_node
+  nav2_behavior_tree::nav2_compute_and_track_route_bt_node
+  nav2_behavior_tree::nav2_compute_and_track_route_cancel_bt_node
+  nav2_behavior_tree::nav2_compute_path_through_poses_action_bt_node
+  nav2_behavior_tree::nav2_compute_path_to_pose_action_bt_node
+  nav2_behavior_tree::nav2_compute_route_bt_node
+  nav2_behavior_tree::nav2_concatenate_paths_action_bt_node
+  nav2_behavior_tree::nav2_controller_cancel_bt_node
+  nav2_behavior_tree::nav2_controller_selector_bt_node
+  nav2_behavior_tree::nav2_distance_controller_bt_node
+  nav2_behavior_tree::nav2_distance_traveled_condition_bt_node
+  nav2_behavior_tree::nav2_drive_on_heading_bt_node
+  nav2_behavior_tree::nav2_drive_on_heading_cancel_bt_node
+  nav2_behavior_tree::nav2_extract_route_nodes_as_goals_action_bt_node
+  nav2_behavior_tree::nav2_follow_path_action_bt_node
+  nav2_behavior_tree::nav2_get_current_pose_action_bt_node
+  nav2_behavior_tree::nav2_get_next_few_goals_action_bt_node
+  nav2_behavior_tree::nav2_get_pose_from_path_action_bt_node
+  nav2_behavior_tree::nav2_globally_updated_goal_condition_bt_node
+  nav2_behavior_tree::nav2_goal_checker_selector_bt_node
+  nav2_behavior_tree::nav2_goal_reached_condition_bt_node
+  nav2_behavior_tree::nav2_goal_updated_condition_bt_node
+  nav2_behavior_tree::nav2_goal_updated_controller_bt_node
+  nav2_behavior_tree::nav2_goal_updater_node_bt_node
+  nav2_behavior_tree::nav2_initial_pose_received_condition_bt_node
+  nav2_behavior_tree::nav2_is_battery_charging_condition_bt_node
+  nav2_behavior_tree::nav2_is_battery_low_condition_bt_node
+  nav2_behavior_tree::nav2_is_path_valid_condition_bt_node
+  nav2_behavior_tree::nav2_is_stopped_condition_bt_node
+  nav2_behavior_tree::nav2_is_stuck_condition_bt_node
+  nav2_behavior_tree::nav2_navigate_through_poses_action_bt_node
+  nav2_behavior_tree::nav2_navigate_to_pose_action_bt_node
+  nav2_behavior_tree::nav2_path_expiring_timer_condition
+  nav2_behavior_tree::nav2_path_longer_on_approach_bt_node
+  nav2_behavior_tree::nav2_pipeline_sequence_bt_node
+  nav2_behavior_tree::nav2_planner_selector_bt_node
+  nav2_behavior_tree::nav2_progress_checker_selector_bt_node
+  nav2_behavior_tree::nav2_rate_controller_bt_node
+  nav2_behavior_tree::nav2_recovery_node_bt_node
+  nav2_behavior_tree::nav2_reinitialize_global_localization_service_bt_node
+  nav2_behavior_tree::nav2_remove_in_collision_goals_action_bt_node
+  nav2_behavior_tree::nav2_remove_passed_goals_action_bt_node
+  nav2_behavior_tree::nav2_round_robin_node_bt_node
+  nav2_behavior_tree::nav2_single_trigger_bt_node
+  nav2_behavior_tree::nav2_smooth_path_action_bt_node
+  nav2_behavior_tree::nav2_smoother_selector_bt_node
+  nav2_behavior_tree::nav2_speed_controller_bt_node
+  nav2_behavior_tree::nav2_spin_action_bt_node
+  nav2_behavior_tree::nav2_spin_cancel_bt_node
+  nav2_behavior_tree::nav2_time_expired_condition_bt_node
+  nav2_behavior_tree::nav2_transform_available_condition_bt_node
+  nav2_behavior_tree::nav2_truncate_path_action_bt_node
+  nav2_behavior_tree::nav2_truncate_path_local_action_bt_node
+  nav2_behavior_tree::nav2_wait_action_bt_node
+  nav2_behavior_tree::nav2_wait_cancel_bt_node
+  nav2_behavior_tree::nav2_would_a_controller_recovery_help_condition_bt_node
+  nav2_behavior_tree::nav2_would_a_planner_recovery_help_condition_bt_node
+  nav2_behavior_tree::nav2_would_a_route_recovery_help_condition_bt_node
+  nav2_behavior_tree::nav2_would_a_smoother_recovery_help_condition_bt_node
+  nav2_util::nav2_util_core
+  rclcpp::rclcpp
+  rclcpp_action::rclcpp_action
+  rclcpp_lifecycle::rclcpp_lifecycle
+  tf2_geometry_msgs::tf2_geometry_msgs
+  tf2_ros::static_transform_broadcaster_node
+  tf2_ros::tf2_ros
 )
-
-ament_target_dependencies(project11_navigation_bt_plugins
-  behaviortree_cpp
-  dubins_curves
-  grid_map_ros
-  nav_msgs
-  nav2_behavior_tree
-  nav2_util
-  project11_msgs
-  project11_nav_msgs
-  rclcpp
-  rclcpp_action
-  rclcpp_lifecycle
-  tf2_geometry_msgs
-  tf2_ros
-  visualization_msgs
-)
-
 target_compile_definitions(project11_navigation_bt_plugins PRIVATE BT_PLUGIN_EXPORT)
 
 
@@ -161,9 +229,9 @@ set(GENERATED_DIR ${CMAKE_CURRENT_BINARY_DIR}/gen)
 configure_file(plugins_list.hpp.in ${GENERATED_DIR}/plugins_list.hpp)
 
 add_executable(generate_project11_navigation_tree_nodes_xml src/generate_project11_navigation_tree_nodes_xml.cpp)
-ament_target_dependencies(generate_project11_navigation_tree_nodes_xml 
-  behaviortree_cpp
-  nav2_util
+target_link_libraries(generate_project11_navigation_tree_nodes_xml PUBLIC
+  behaviortree_cpp::behaviortree_cpp
+  nav2_util::nav2_util_core
 )
 # allow generate_nav2_tree_nodes_xml to find plugins_list.hpp
 target_include_directories(generate_project11_navigation_tree_nodes_xml PRIVATE ${GENERATED_DIR})
@@ -191,13 +259,18 @@ target_include_directories(${hover_plugin}
 
 target_compile_definitions(${hover_plugin} PUBLIC "PLUGINLIB__DISABLE_BOOST_FUNCTIONS")
 
-ament_target_dependencies(${hover_plugin}
-  nav2_behaviors
-  pluginlib
-  project11_nav_msgs
-  rclcpp
-  rclcpp_lifecycle
-  visualization_msgs
+target_link_libraries(project11_navigation_hover_behavior_plugin PUBLIC
+  ${project11_nav_msgs_TARGETS}
+  ${visualization_msgs_TARGETS}
+  nav2_behaviors::behavior_server_core
+  nav2_behaviors::nav2_assisted_teleop_behavior
+  nav2_behaviors::nav2_back_up_behavior
+  nav2_behaviors::nav2_drive_on_heading_behavior
+  nav2_behaviors::nav2_spin_behavior
+  nav2_behaviors::nav2_wait_behavior
+  pluginlib::pluginlib
+  rclcpp::rclcpp
+  rclcpp_lifecycle::rclcpp_lifecycle
 )
 
 pluginlib_export_plugin_description_file(nav2_core behavior_plugin.xml)
@@ -228,16 +301,21 @@ target_include_directories(${path_follower_plugin}
 
 target_compile_definitions(${path_follower_plugin} PUBLIC "PLUGINLIB__DISABLE_BOOST_FUNCTIONS")
 
-ament_target_dependencies(${path_follower_plugin}
-  nav2_core
-  nav2_costmap_2d
-  nav2_util
-  pluginlib
-  project11
-  project11_msgs
-  rclcpp
-  tf2
+target_link_libraries(${path_follower_plugin} PUBLIC
+  ${project11_msgs_TARGETS}
+  ${visualization_msgs_TARGETS}
+  nav2_core::nav2_core
+  nav2_costmap_2d::filters
+  nav2_costmap_2d::layers
+  nav2_costmap_2d::nav2_costmap_2d_client
+  nav2_costmap_2d::nav2_costmap_2d_core
+  nav2_util::nav2_util_core
+  pluginlib::pluginlib
+  project11::project11
+  rclcpp::rclcpp
+  tf2::tf2
 )
+
 
 pluginlib_export_plugin_description_file(nav2_core crabbing_path_follower_plugin.xml)
 
@@ -261,25 +339,20 @@ add_executable(navigator
 )
 
 target_include_directories(navigator PRIVATE ${GENERATED_DIR})
-
-target_link_libraries(navigator
+target_link_libraries(navigator PUBLIC
   ament_index_cpp::ament_index_cpp
   project11::project11
   project11_navigation::project11_navigation
+  ${project11_nav_msgs_TARGETS}
+  ${visualization_msgs_TARGETS}
+  behaviortree_cpp::behaviortree_cpp
+  nav2_util::nav2_util_core
+  rclcpp::rclcpp
+  rclcpp_lifecycle::rclcpp_lifecycle
+  tf2_geometry_msgs::tf2_geometry_msgs
 )
-
-ament_target_dependencies(navigator
-  behaviortree_cpp
-  nav2_util
-  project11_nav_msgs
-  rclcpp
-  rclcpp_lifecycle
-  tf2_geometry_msgs
-)
-
 
 # task navigator
-
 add_library(task_navigator SHARED
   src/bt_types.cpp
   src/task_navigator.cpp
@@ -300,7 +373,7 @@ target_link_libraries(task_navigator PUBLIC
   ${nav2_core_LIBRARIES}
   project11::project11
   ${project11_nav_msgs_TARGETS}
-  
+  ${visualization_msgs_TARGETS}
 )
 
 
