@@ -35,11 +35,9 @@ void CrabbingPathFollower::configure(
     visualization_publisher_ = node->create_publisher<visualization_msgs::msg::MarkerArray>(
       "path_follower_visualization", 1);
   }
-  
-  double transform_tolerance;
-  nav2_util::declare_parameter_if_not_declared(node, plugin_name_ + ".transform_tolerance", rclcpp::ParameterValue(transform_tolerance_.seconds()));
-  node->get_parameter(plugin_name_ + ".transform_tolerance", transform_tolerance);
-  transform_tolerance_ = rclcpp::Duration::from_seconds(transform_tolerance);
+
+  nav2_util::declare_parameter_if_not_declared(node, plugin_name_ + ".transform_tolerance", rclcpp::ParameterValue(transform_tolerance_));
+  node->get_parameter(plugin_name_ + ".transform_tolerance", transform_tolerance_);
   global_pub_ = node->create_publisher<nav_msgs::msg::Path>("received_global_plan", 1);
 }
 
@@ -57,7 +55,7 @@ void CrabbingPathFollower::activate()
     visualization_publisher_->on_activate();
   }
   pid_->on_activate();
-  
+
   RCLCPP_INFO(logger_, "Activating controller plugin %s", plugin_name_.c_str());
 }
 
@@ -117,15 +115,11 @@ geometry_msgs::msg::TwistStamped CrabbingPathFollower::computeVelocityCommands(
   RCLCPP_DEBUG_STREAM(logger_, "CrabbingPathFollower: target_speed: " << target_speed << " desired_speed_: " << desired_speed_ << " speed_limit_: " << speed_limit_ << " speed_limit_is_percentage_: " << speed_limit_is_percentage_);
 
   geometry_msgs::msg::PoseStamped pose_in_plan;
-  try
-  {
-    tf_->transform(pose, pose_in_plan, global_plan_.header.frame_id);
-  }
-  catch (tf2::TransformException &ex)
-  {
-    RCLCPP_WARN_STREAM(logger_, "CrabbingPathFollower:  Error getting pose to plan transform: " << ex.what());
-    return cmd_vel;
-  }
+
+  nav2_util::transformPoseInTargetFrame(
+    pose, pose_in_plan, *tf_,
+    costmap_ros_->getGlobalFrameID(),
+    transform_tolerance_);
 
   double segment_distance = 0.0;
   double vehicle_distance = 0.0;
@@ -158,7 +152,7 @@ geometry_msgs::msg::TwistStamped CrabbingPathFollower::computeVelocityCommands(
     project11::AngleRadians vehicle_azimuth(atan2(-dy, -dx));
 
     auto error_azimuth = vehicle_azimuth - segment_azimuth;
-      
+
     sin_error_azimuth = sin(error_azimuth);
     cos_error_azimuth = cos(error_azimuth);
 
@@ -216,7 +210,7 @@ void CrabbingPathFollower::publish_visualization(
     return;
 
   visualization_msgs::msg::MarkerArray marker_array;
-  
+
   std::array<std_msgs::msg::ColorRGBA, 3> colors;
   // past_color
   colors[0].r = 0.25;
@@ -268,7 +262,7 @@ void CrabbingPathFollower::publish_visualization(
           markers[1].points.push_back(poses[i].pose.position);
           markers[1].points.push_back(poses[i+1].pose.position);
           // rest will be assigned to future
-          markers_index = 2; 
+          markers_index = 2;
           continue; // so we don't add to future on this iteration
         }
       }
