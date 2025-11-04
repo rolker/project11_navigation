@@ -1,7 +1,0 @@
-<library path="marine_nav_bt_task_navigator">
-  <class type="marine_nav_bt_task_navigator::TaskNavigator" base_class_type="nav2_core::NavigatorBase">
-    <description>
-      Run a list of navigation tasks.
-    </description>
-  </class>
-</library>
